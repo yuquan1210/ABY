@@ -52,7 +52,7 @@ uint32_t ArithmeticCircuit::PutMULGate(uint32_t inleft, uint32_t inright) {
 	// instead.
 	if (m_vGates[inleft].type == G_CONSTANT || m_vGates[inright].type == G_CONSTANT) {
 #ifdef DEBUGARITH
-		std::cout << "MUL(" << inleft << ", " << inright <<
+		std::cout << "[ArithCirc::PutMULGate] MUL(" << inleft << ", " << inright <<
 			"): Constant factor present, putting a MULCONST gate instead." << std::endl;
 #endif
 		return PutMULCONSTGate(inleft, inright);
@@ -78,7 +78,7 @@ uint32_t ArithmeticCircuit::PutMULCONSTGate(uint32_t inleft, uint32_t inright) {
 	// One of the gates needs to be a constant gate
 	assert (m_vGates[inleft].type == G_CONSTANT || m_vGates[inright].type == G_CONSTANT);
 	if (m_vGates[inleft].type == G_CONSTANT && m_vGates[inright].type == G_CONSTANT) {
-		std::cerr << "MULCONST(" << inleft << "," << inright <<
+		std::cerr << "[ArithCirc::PutMULCONSTGate] MULCONST(" << inleft << "," << inright <<
 			"): Both sides are constants, consider just multiplying their values before adding them as CONST gates.\n";
 	}
 
@@ -382,6 +382,8 @@ void ArithmeticCircuit::UpdateInteractiveQueue(uint32_t gateid) {
 		}
 	}
 	m_vInteractiveQueueOnLvl[m_vGates[gateid].depth].push_back(gateid);
+
+    m_nGates++;
 }
 
 //enqueue locally evaluated gate queue
@@ -393,6 +395,8 @@ void ArithmeticCircuit::UpdateLocalQueue(uint32_t gateid) {
 		}
 	}
 	m_vLocalQueueOnLvl[m_vGates[gateid].depth].push_back(gateid);
+
+    m_nGates++;
 }
 
 void ArithmeticCircuit::Reset() {

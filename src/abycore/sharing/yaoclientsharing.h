@@ -22,7 +22,8 @@
 #include <algorithm>
 #include "yaosharing.h"
 
-//#define DEBUGYAOCLIENT
+#define DEBUGYAOCLIENT
+#define DEBUGYAO
 
 /**
  Yao Client Sharing class.

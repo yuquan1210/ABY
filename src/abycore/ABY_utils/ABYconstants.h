@@ -27,14 +27,14 @@
 
 //#define ABYDEBUG
 //#define PRINT_OUTPUT
-//#define DEBUGCOMM
-#define DEBUGABYPARTY 0
+#define DEBUGCOMM
+#define DEBUGABYPARTY 1
 
-#define PRINT_PERFORMANCE_STATS 0 //prints overall runtime statistics and gate counts
-#define PRINT_COMMUNICATION_STATS 0 //prints communication statistics
-#define BENCHONLINEPHASE 0 //show very detailed runtime statistic on each sharing for online phase, typically for troubleshooting
+#define PRINT_PERFORMANCE_STATS 1 //prints overall runtime statistics and gate counts
+#define PRINT_COMMUNICATION_STATS 1 //prints communication statistics
+#define BENCHONLINEPHASE 1 //show very detailed runtime statistic on each sharing for online phase, typically for troubleshooting
 
-#define BENCH_HARDWARE 0 // measure RTT, connection bandwidth and AES
+#define BENCH_HARDWARE 1 // measure RTT, connection bandwidth and AES
 
 #define BATCH
 

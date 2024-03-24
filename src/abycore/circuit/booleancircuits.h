@@ -316,6 +316,10 @@ public:
 		return m_nYSwitchGates;
 	}
 
+    uint32_t GetNumConvToYaoInputBits(){
+        return m_nB2YGates + m_nA2YGates + m_nYSwitchGates;
+    }
+
 	uint32_t GetNumANDGates() {
 		return m_vANDs[0].numgates;
 	}

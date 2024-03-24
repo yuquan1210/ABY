@@ -214,7 +214,7 @@ public:
 		return m_nGates;
 	}
 
-
+    e_gatetype GetGateType(uint32_t gateid);
 	gate_specific GetGateSpecificOutput(uint32_t gateid);
 	UGATE_T* GetOutputGateValue(uint32_t gateid);
 	uint32_t GetOutputGateValue(uint32_t gateid, UGATE_T*& outval);
@@ -227,6 +227,8 @@ public:
 		assert(gateid < m_cCircuit->GetGateHead());
 		return m_vGates[gateid].nvals;
 	}
+
+    virtual uint32_t GetNumConvToYaoInputBits() = 0;
 
 	/* Common gate-building routines */
 	virtual share* PutCONSGate(UGATE_T val, uint32_t bitlen) = 0;

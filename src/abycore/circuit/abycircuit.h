@@ -28,7 +28,7 @@
 #include <ENCRYPTO_utils/constants.h>
 #include <ENCRYPTO_utils/utils.h>
 
-//#define DEBUG_CIRCUIT_CONSTRUCTION
+// #define DEBUG_CIRCUIT_CONSTRUCTION
 
 //A macro that defines whether a gate requires interaction
 #define IsInteractive(gatetype, gatecontext) (!((gatecontext == C_ARITH && gatetype == G_ADD) || ((gatecontext == C_BOOL || gatecontext == C_YAO) && gatetype == G_XOR)) || (gatetype == G_MUL))

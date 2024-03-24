@@ -90,6 +90,10 @@ void Circuit::Reset() {
 	//m_vNonLinOnLayer.min_depth = 0;
 }
 
+e_gatetype Circuit::GetGateType(uint32_t gateid) {
+	return m_vGates[gateid].type;
+}
+
 gate_specific Circuit::GetGateSpecificOutput(uint32_t gateid) {
 	assert(m_vGates[gateid].instantiated);
 	return m_vGates[gateid].gs;

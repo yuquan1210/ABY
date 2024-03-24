@@ -309,6 +309,11 @@ public:
 	}
 	;
 
+    uint32_t GetNumConvToYaoInputBits(){
+        //y: arith circuit has no implementation of conv gates to yao
+        return 0;
+    }
+
 	//share* PutCONSGate(UGATE_T val, uint32_t nvals = 1);
 	share* PutCONSGate(UGATE_T val, uint32_t bitlen);
 	share* PutCONSGate(uint8_t* val, uint32_t bitlen);

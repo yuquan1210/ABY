@@ -99,7 +99,7 @@ void YaoClientSharing::PrepareSetupPhase(ABYSetup* setup) {
 	m_vChoiceBits.Create(m_nClientInputBits + m_nConversionInputBits, m_cCrypto);
 
 #ifdef DEBUGYAOCLIENT
-	std::cout << "OT Choice bits: " << std::endl;
+	std::cout << "[YaoClientShar::PrepSetup] OT Choice bits: " << std::endl;
 	m_vChoiceBits.Print(0, m_nClientInputBits + m_nConversionInputBits);
 #endif
 	/* Use the standard XORMasking function */
@@ -130,13 +130,16 @@ void YaoClientSharing::PrepareOnlinePhase() {
 }
 
 void YaoClientSharing::ReceiveGarbledCircuitAndOutputShares(ABYSetup* setup) {
-	if (m_nANDGates > 0)
+    std::cout << "[PerformSetup->YaoClientShar::RcvGarbCircAndOutputShar] ..." << std::endl;
+	if (m_nANDGates > 0){
 		setup->AddReceiveTask(m_vGarbledCircuit.GetArr(), ((uint64_t) m_nANDGates) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE);
-	if (m_nUNIVGates > 0)
+    }
+    if (m_nUNIVGates > 0){
 		setup->AddReceiveTask(m_vUniversalGateTable.GetArr(), ((uint64_t) m_nUNIVGates) * m_nSecParamBytes * KEYS_PER_UNIV_GATE_IN_TABLE);
-	if (m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT) > 0)
-		setup->AddReceiveTask(m_vOutputShareRcvBuf.GetArr(), ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8));
-
+    }
+    if (m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT) > 0){
+    	setup->AddReceiveTask(m_vOutputShareRcvBuf.GetArr(), ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8));
+    }
 }
 
 void YaoClientSharing::FinishSetupPhase(ABYSetup* setup) {
@@ -148,16 +151,16 @@ void YaoClientSharing::FinishSetupPhase(ABYSetup* setup) {
 	std::cout << "Outshares C: " << std::endl;
 	m_vOutputShareRcvBuf.PrintHex(ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8));*/
 #ifdef DEBUGYAOCLIENT
-	std::cout << "Received Garbled Circuit: ";
+	std::cout << "[YaoClientShar::FinishSetup] Received Garbled Circuit: ";
 	m_vGarbledCircuit.PrintHex();
-	std::cout << "Received my output shares: ";
+	std::cout << "[YaoClientShar::FinishSetup] Received my output shares: ";
 	m_vOutputShareRcvBuf.Print(0, m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT));
 
 	if(m_cBoolCircuit->GetMaxDepth() == 0)
 	return;
-	std::cout << "Choice bits in OT: ";
+	std::cout << "[YaoClientShar::FinishSetup] Choice bits in OT: ";
 	m_vChoiceBits.Print(0, m_nClientInputBits);
-	std::cout << "Resulting R from OT: ";
+	std::cout << "[YaoClientShar::FinishSetup] Resulting R from OT: ";
 	m_vROTMasks.PrintHex();
 #endif
 }
@@ -218,7 +221,7 @@ void YaoClientSharing::EvaluateInteractiveOperations(uint32_t depth) {
 	for (uint32_t i = 0; i < interactiveops.size(); i++) {
 		GATE* gate = &(m_vGates[interactiveops[i]]);
 #ifdef DEBUGYAOCLIENT
-		std::cout << "Evaluating interactive operation in Yao client sharing with type = " << get_gate_type_name(gate->type) << std::endl;
+		std::cout << "[YaoClientShar::EvalInterOp] Evaluating interactive operation in Yao client sharing with type = " << get_gate_type_name(gate->type) << std::endl;
 #endif
 		if (gate->type == G_IN) {
 			if (gate->gs.ishare.src == SERVER) {
@@ -230,7 +233,7 @@ void YaoClientSharing::EvaluateInteractiveOperations(uint32_t depth) {
 			}
 		} else if (gate->type == G_OUT) {
 #ifdef DEBUGYAOCLIENT
-			std::cout << "Obtained output gate with key = ";
+			std::cout << "[YaoClientShar::EvalInterOp] Obtained output gate with key = ";
 			PrintKey(m_vGates[gate->ingates.inputs.parent].gs.yval);
 			std::cout << std::endl;
 #endif
@@ -251,7 +254,7 @@ void YaoClientSharing::EvaluateInteractiveOperations(uint32_t depth) {
 		} else if(gate->type == G_CALLBACK) {
 			EvaluateCallbackGate(interactiveops[i]);
 		} else {
-			std::cerr << "YaoClientSharing: Interactive operation not recognized: " << (uint32_t) gate->type << "(" <<
+			std::cerr << "[YaoClientShar::EvalInterOp] YaoClientSharing: Interactive operation not recognized: " << (uint32_t) gate->type << "(" <<
 					get_gate_type_name(gate->type) << ")" << std::endl;
 		}
 	}
@@ -313,7 +316,6 @@ void YaoClientSharing::EvaluateANDGate(GATE* gate) {
 
 BOOL YaoClientSharing::EvaluateGarbledTable(GATE* gate, uint32_t pos, GATE* gleft, GATE* gright)
 {
-
 	uint8_t *lkey, *rkey, *okey, *gtptr;
 	uint8_t lpbit, rpbit;
 
@@ -340,7 +342,8 @@ BOOL YaoClientSharing::EvaluateGarbledTable(GATE* gate, uint32_t pos, GATE* glef
 		m_pKeyOps->XOR(okey, okey, lkey);//gc_xor(okey, okey, gtptr+BYTES_SSP);
 	}
 
-#ifdef DEBUGYAOCLIENT
+    std::cout << "[YaoClientShar::EvalGarblTable] ..." << std::endl;
+#ifndef DEBUGYAOCLIENT
 		std::cout << " using: ";
 		PrintKey(lkey);
 		std::cout << " (" << (uint32_t) lpbit << ") and : ";
@@ -530,7 +533,7 @@ void YaoClientSharing::GetDataToSend(std::vector<BYTE*>& sendbuf, std::vector<ui
 	//Send the correlation bits with the random OTs
 	if (m_nClientSndOTCtr > 0) {
 #ifdef DEBUGYAOCLIENT
-		std::cout << "want to send client OT-bits which are of size " << m_nClientSndOTCtr << " bits" << std::endl;
+		std::cout << "[YaoClientShar::GetDataToSend] want to send client OT-bits which are of size " << m_nClientSndOTCtr << " bits" << std::endl;
 #endif
 		m_vROTSndBuf.XORBitsPosOffset(m_vChoiceBits.GetArr(), m_nChoiceBitCtr, 0, m_nClientSndOTCtr);
 #ifdef DEBUGYAOCLIENT
@@ -546,19 +549,19 @@ void YaoClientSharing::GetDataToSend(std::vector<BYTE*>& sendbuf, std::vector<ui
 
 	if (m_nServerOutputShareCtr > 0) {
 #ifdef DEBUGYAOCLIENT
-		std::cout << "want to send server output shares which are of size " << m_nServerOutputShareCtr << " bits" << std::endl;
+		std::cout << "[YaoClientShar::GetDataToSend] want to send server output shares which are of size " << m_nServerOutputShareCtr << " bits" << std::endl;
 #endif
 		sendbuf.push_back(m_vOutputShareSndBuf.GetArr());
 		sndbytes.push_back(ceil_divide(m_nServerOutputShareCtr, 8));
 	}
 
 #ifdef DEBUGYAO
-	if(m_nInputShareSndSize > 0) {
-		std::cout << "Sending " << m_nInputShareSndSize << " Input shares : ";
-		m_vInputShareSndBuf.Print(0, m_nInputShareSndSize);
-	}
+	// if(m_nInputShareSndSize > 0) {
+	// 	std::cout << "Sending " << m_nInputShareSndSize << " Input shares : ";
+	// 	m_vInputShareSndBuf.Print(0, m_nInputShareSndSize);
+	// }
 	if(m_nOutputShareSndSize > 0) {
-		std::cout << "Sending " << m_nOutputShareSndSize << " Output shares : ";
+		std::cout << "[YaoClientShar::GetDataToSend] Sending " << m_nOutputShareSndSize << " Output shares : ";
 		m_vOutputShareSndBuf.Print(0, m_nOutputShareSndSize);
 	}
 #endif
@@ -625,7 +628,7 @@ void YaoClientSharing::AssignServerInputKeys() {
 		memcpy(gate->gs.yval, m_vServerInputKeys.GetArr() + offset, m_nSecParamBytes * gate->nvals);
 		offset += (m_nSecParamBytes * gate->nvals);
 #ifdef DEBUGYAOCLIENT
-		std::cout << "assigned server input key: ";
+		std::cout << "[FinishCircLayer->YaoClientShar::AssignServerInputKey] assigned server input key: ";
 		PrintKey(gate->gs.yval);
 		std::cout << std::endl;
 #endif
@@ -649,11 +652,11 @@ void YaoClientSharing::AssignClientInputKeys() {
 					m_vClientKeyRcvBuf[m_vChoiceBits.GetBitNoMask(m_nKeyInputRcvIdx)].GetArr() + offset * m_nSecParamBytes,
 					m_vROTMasks.GetArr() + m_nKeyInputRcvIdx * m_nSecParamBytes);
 #ifdef DEBUGYAOCLIENT
-			std::cout << "assigned client input key to gate " << m_vClientRcvInputKeyGates[i] << ": ";
+			std::cout << "[FinishCircLayer->YaoClientShar::AssignClientInputKey] assigned client input key to gate " << m_vClientRcvInputKeyGates[i] << ": ";
 			PrintKey(gate->gs.yval);
-			std::cout << " (" << (uint32_t) m_vChoiceBits.GetBitNoMask(m_nKeyInputRcvIdx) << ") = " << std::endl;
+			std::cout << " (" << (uint32_t) m_vChoiceBits.GetBitNoMask(m_nKeyInputRcvIdx) << ") = ";
 			PrintKey( m_vClientKeyRcvBuf[m_vChoiceBits.GetBitNoMask(m_nKeyInputRcvIdx)].GetArr() + offset * m_nSecParamBytes);
-			std::cout << " ^ " << std::endl;
+			std::cout << " ^ ";
 			PrintKey(m_vROTMasks.GetArr() + (m_nKeyInputRcvIdx) * m_nSecParamBytes);
 			std::cout << std::endl;
 #endif

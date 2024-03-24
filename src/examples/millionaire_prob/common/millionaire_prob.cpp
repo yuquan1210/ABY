@@ -42,6 +42,9 @@ int32_t test_millionaire_prob_circuit(e_role role, const std::string& address, u
 		Step 3: Create the circuit object on the basis of the sharing type
 				being inputed.
 	*/
+    Circuit* ac = sharings[S_ARITH]->GetCircuitBuildRoutine();
+	Circuit* yc = sharings[S_YAO] ->GetCircuitBuildRoutine();
+	Circuit* bc = sharings[S_BOOL]->GetCircuitBuildRoutine();
 	Circuit* circ = sharings[sharing]->GetCircuitBuildRoutine();
 
 
@@ -101,6 +104,8 @@ int32_t test_millionaire_prob_circuit(e_role role, const std::string& address, u
 		Step 9: Executing the circuit using the ABYParty object evaluate the
 				problem.
 	*/
+
+    CalculateAllCircuitCost(ac, bc, yc);
 	party->ExecCircuit();
 
 	/**

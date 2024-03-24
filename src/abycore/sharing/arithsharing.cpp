@@ -75,6 +75,7 @@ void ArithSharing<T>::InitNewLayer() {
 template<typename T>
 void ArithSharing<T>::PrepareSetupPhase(ABYSetup* setup) {
 	m_nMTs = m_cArithCircuit->GetNumMULGates();
+    std::cout << "[ArithSharing::PrepareSetup] m_nMTs (m_cArithCircuit->GetNumMULGates): " << m_nMTs << std::endl;
 
 	InitMTs();
 
@@ -104,8 +105,8 @@ void ArithSharing<T>::PrepareSetupPhase(ABYSetup* setup) {
 					task->pval.rcvval.C = &(m_vA[0]);
 					task->pval.rcvval.R = &(m_vS[0]);
 				}
-#ifndef BATCH
-				std::cout << "Adding a OT task which is supposed to perform " << task->numOTs << " OTs on " << m_nTypeBitLen << " bits for ArithMul" << std::endl;
+#ifdef BATCH
+				std::cout << "[ArithSharing::PrepareSetupPhase] Adding a IKNP OT task which is supposed to perform " << task->numOTs << " OTs on " << m_nTypeBitLen << " bits for ArithMul" << std::endl;
 #endif
 				setup->AddOTTask(task, i);
 			}
@@ -113,6 +114,7 @@ void ArithSharing<T>::PrepareSetupPhase(ABYSetup* setup) {
 	}
 
 	m_nNumCONVs = m_cArithCircuit->GetNumCONVGates();
+    std::cout << "[ArithSharing::PrepareSetup] m_nNumCONVs (m_cArithCircuit->GetNumCONVGates): " << m_nNumCONVs << std::endl;
 	if (m_nNumCONVs > 0) {
 		XORMasking* fXORMaskFct = new XORMasking(m_nTypeBitLen); //TODO to implement the vector multiplication change first argument
 
@@ -135,8 +137,7 @@ void ArithSharing<T>::PrepareSetupPhase(ABYSetup* setup) {
 			task->pval.rcvval.R = &(m_vConversionMasks[1]);
 		}
 #ifdef DEBUGARITH
-		std::cout << "Conv: Adding an OT task to perform " << task->numOTs <<
-				" OTs for B2A" << std::endl;
+		std::cout << "[ArithSharing::PrepareSetup] Conv: Adding an IKNP OT task to perform (task->numOTs) OTs for B2A" << std::endl;
 #endif
 		setup->AddOTTask(task, 0);
 
@@ -164,7 +165,8 @@ template<typename T>
 void ArithSharing<T>::FinishSetupPhase([[maybe_unused]] ABYSetup* setup) {
 #ifdef DEBUGARITH
 	for(uint32_t i = 0; i < m_nMTs; i++) {
-		std::cout << "Output from OT: A: " << (uint64_t) m_vA[0].template Get<T>(i * m_nTypeBitLen, m_nTypeBitLen) << ", B: " << (uint64_t) m_vB[0].template Get<T>(i * m_nTypeBitLen, m_nTypeBitLen)
+        // std::cout << "[ArithSharing::FinishSetup] Output from OT: A: ..., B: ..., C: ..., S: ..." << std::endl;
+		std::cout << "[ArithSharing::FinishSetup] Output from OT: A: " << (uint64_t) m_vA[0].template Get<T>(i * m_nTypeBitLen, m_nTypeBitLen) << ", B: " << (uint64_t) m_vB[0].template Get<T>(i * m_nTypeBitLen, m_nTypeBitLen)
 		<< ", C: " << (uint64_t) m_vC[0].template Get<T>(i * m_nTypeBitLen, m_nTypeBitLen) << ", S: " << (uint64_t) m_vS[0].template Get<T>(i * m_nTypeBitLen, m_nTypeBitLen) << std::endl;
 	}
 #endif
@@ -179,7 +181,7 @@ void ArithSharing<T>::FinishSetupPhase([[maybe_unused]] ABYSetup* setup) {
 #endif
 
 #ifdef DEBUGARITH
-	std::cout << " m_vInputShareSndBuf at end of setup phase = ";
+	std::cout << "[ArithSharing::FinishSetup] m_vInputShareSndBuf at end of setup phase = ";
 	m_vInputShareSndBuf.PrintHex();
 #endif
 }
@@ -219,7 +221,8 @@ void ArithSharing<T>::ComputeMTsFromOTs() {
 		tmp += m_vS[0].template Get<T>(i * m_nTypeBitLen, m_nTypeBitLen);
 		m_vC[0].template Set<T>(tmp, i * m_nTypeBitLen, m_nTypeBitLen);
 #ifdef DEBUGARITH
-		std::cout << "Computed MT " << i << ": ";
+		std::cout << "[ArithSharing::Compute MT from OT] Computed MT " << i << ": ";
+        // std::cout << "A: ..., B: ..., C: ..." << std::endl;
 		std::cout << "A: " << (uint64_t) m_vA[0].template Get<T>(i * m_nTypeBitLen, m_nTypeBitLen) << ", B: " << (uint64_t) m_vB[0].template Get<T>(i * m_nTypeBitLen, m_nTypeBitLen)
 		<< ", C: " << (uint64_t) m_vC[0].template Get<T>(i * m_nTypeBitLen, m_nTypeBitLen) << std::endl;
 #endif
@@ -252,13 +255,13 @@ void ArithSharing<T>::PrepareOnlinePhase() {
 	uint32_t otherinvals = m_cArithCircuit->GetNumInputBitsForParty(m_eRole == SERVER ? CLIENT : SERVER);
 	uint32_t otheroutvals = m_cArithCircuit->GetNumOutputBitsForParty(m_eRole == SERVER ? CLIENT : SERVER);
 
-#ifndef BATCH
-	std::cout << "ninputvals = " << myinvals << ", noutputvals = " << myoutvals << ", typelen = " << m_nTypeBitLen << std::endl;
+#ifdef BATCH
+	std::cout << "[ArithSharing::PrepOnline] ninputvals = " << myinvals << ", noutputvals = " << myoutvals << ", typelen = " << m_nTypeBitLen << std::endl;
 #endif
 
 	m_vInputShareSndBuf.Create(myinvals, m_nTypeBitLen, m_cCrypto);
 #ifdef DEBUGARITH
-	std::cout << " m_vInputShareSndBuf at prep online phase = ";
+	std::cout << "[ArithSharing::PrepOnline] m_vInputShareSndBuf at prep online phase = ";
 	m_vInputShareSndBuf.PrintHex();
 #endif
 
@@ -278,29 +281,35 @@ void ArithSharing<T>::EvaluateLocalOperations(uint32_t depth) {
 		GATE* gate = &(m_vGates[localops[i]]);
 
 #ifdef DEBUGARITH
-		std::cout << "Evaluating gate with id = " << localops[i] << " of type " << gate->type << std::endl;
+		std::cout << "[ArithSharing::EvalLocalOps] Evaluating gate with id = " << localops[i] << " of type (gate->type) " << std::endl;
 #endif
 
 		if (IsSIMDGate(gate->type)) {
 			EvaluateSIMDGate(localops[i]);
 		} else if (gate->type == G_LIN) {
 #ifdef DEBUGARITH
-			std::cout << " which is an ADD gate" << std::endl;
+			std::cout << "[ArithSharing::EvalLocalOps] eval an ADD gate" << std::endl;
 #endif
 			EvaluateADDGate(gate);
 		} else if (gate->type == G_INV) {
 #ifdef DEBUGARITH
-			std::cout << " which is an INV gate" << std::endl;
+			std::cout << "[ArithSharing::EvalLocalOps] eval an INV gate" << std::endl;
 #endif
 			EvaluateINVGate(gate);
 		} else if (gate->type == G_NON_LIN_CONST) {
 #ifdef DEBUGARITH
-			std::cout << " which is a MULCONST gate" << std::endl;
+			std::cout << "[ArithSharing::EvalLocalOps] eval a MULCONST gate" << std::endl;
 #endif
 			EvaluateMULCONSTGate(gate);
 		} else if (gate->type == G_CONSTANT) {
+#ifdef DEBUGARITH
+			std::cout << "[ArithSharing::EvalLocalOps] eval a CONSTANT gate" << std::endl;
+#endif
 			EvaluateConstantGate(gate);
 		} else if (gate->type == G_CALLBACK) {
+#ifdef DEBUGARITH
+			std::cout << "[ArithSharing::EvalLocalOps] eval a Callback gate" << std::endl;
+#endif
 			EvaluateCallbackGate(localops[i]);
 		} else if (gate->type == G_SHARED_IN) {
 			// nothing to do here
@@ -326,21 +335,24 @@ void ArithSharing<T>::EvaluateInteractiveOperations(uint32_t depth) {
 
 	for (uint32_t i = 0; i < interactiveops.size(); i++) {
 		GATE* gate = &(m_vGates[interactiveops[i]]);
+#ifdef DEBUGARITH
+        std::cout << "[ArithSharing::EvalInterOps] Evaluating gate with id = " << interactiveops[i] << " of type " << gate->type << std::endl;
+#endif
 
 		if (gate->type == G_NON_LIN) {
 #ifdef DEBUGARITH
-			std::cout << " which is an MUL gate" << std::endl;
+			std::cout << "[ArithSharing::EvalInterOps] eval an MUL gate" << std::endl;
 #endif
 			SelectiveOpen(gate);
 		} else if (gate->type == G_IN) {
 			if (gate->gs.ishare.src == m_eRole) {
 #ifdef DEBUGARITH
-				std::cout << " which is my input gate" << std::endl;
+				std::cout << "[ArithSharing::EvalInterOps] eval my input gate" << std::endl;
 #endif
 				ShareValues(gate);
 			} else {
 #ifdef DEBUGARITH
-				std::cout << " which is the other parties input gate" << std::endl;
+				std::cout << "[ArithSharing::EvalInterOps] eval the other parties input gate" << std::endl;
 #endif
 				m_vInputShareGates.push_back(gate);
 				m_nInputShareRcvCtr += gate->nvals;
@@ -348,32 +360,32 @@ void ArithSharing<T>::EvaluateInteractiveOperations(uint32_t depth) {
 		} else if (gate->type == G_OUT) {
 			if (gate->gs.oshare.dst == m_eRole) {
 #ifdef DEBUGARITH
-				std::cout << " which is my output gate" << std::endl;
+				std::cout << "[ArithSharing::EvalInterOps] eval my output gate" << std::endl;
 #endif
 				m_vOutputShareGates.push_back(gate);
 				m_nOutputShareRcvCtr += gate->nvals;
 			} else if (gate->gs.oshare.dst == ALL) {
 #ifdef DEBUGARITH
-				std::cout << " which is an output gate for both of us" << std::endl;
+				std::cout << "[ArithSharing::EvalInterOps] eval an output gate for both of us" << std::endl;
 #endif
 				ReconstructValue(gate);
 				m_vOutputShareGates.push_back(gate);
 				m_nOutputShareRcvCtr += gate->nvals;
 			} else {
 #ifdef DEBUGARITH
-				std::cout << " which is the other parties output gate" << std::endl;
+				std::cout << "[ArithSharing::EvalInterOps] eval the other parties output gate" << std::endl;
 #endif
 				ReconstructValue(gate);
 			}
 		} else if (gate->type == G_CONV) {
 #ifdef DEBUGARITH
-			std::cout << " which is a conversion gate" << std::endl;
+			std::cout << "[ArithSharing::EvalInterOps] eval a conversion gate" << std::endl;
 #endif
 			EvaluateCONVGate(gate);
 		} else if (gate->type == G_CALLBACK) {
 			EvaluateCallbackGate(interactiveops[i]);
 		} else {
-			std::cerr << "Operation not recognized: " << (uint32_t) gate->type << "(" << get_gate_type_name(gate->type) << ")" << std::endl;
+			std::cerr << "[ArithSharing::EvalInterOps] Operation not recognized: " << (uint32_t) gate->type << "(" << get_gate_type_name(gate->type) << ")" << std::endl;
 		}
 	}
 }
@@ -383,7 +395,7 @@ void ArithSharing<T>::EvaluateConstantGate(GATE* gate) {
 	UGATE_T value = gate->gs.constval;
 	InstantiateGate(gate); // overwrites gs.constval by calloc of gs.aval
 	gate->gs.constant.constval = value; // backup constant behind gs.aval
-	if (m_eRole == CLIENT) value = 0;
+	if (m_eRole == CLIENT){ value = 0;}
 
 	T* aval = reinterpret_cast<T*>(gate->gs.aval);
 	for (uint32_t i = 0; i < gate->nvals; i++) {
@@ -401,7 +413,9 @@ void ArithSharing<T>::EvaluateADDGate(GATE* gate) {
 	for (uint32_t i = 0; i < nvals; i++) {
 		((T*) gate->gs.aval)[i] = ((T*) m_vGates[idleft].gs.aval)[i] + ((T*) m_vGates[idright].gs.aval)[i];
 #ifdef DEBUGARITH
-		std::cout << "Result ADD (" << i << "): "<< ((T*)gate->gs.aval)[i] << " = " << ((T*) m_vGates[idleft].gs.aval)[i] << " + " << ((T*)m_vGates[idright].gs.aval)[i] << std::endl;
+        std::cout << "[EvalLocalOp->ArithSharing::EvalAdd] idleft: " << idleft << ", idright: " << idright << std::endl;
+        std::cout << "[EvalLocalOp->ArithSharing::EvalAdd] Result ADD (" << i << "): ... = ... + ..." << std::endl;
+		// std::cout << "[EvalLocalOp->ArithSharing::EvalAdd] Result ADD (" << i << "): "<< ((T*)gate->gs.aval)[i] << " = " << ((T*) m_vGates[idleft].gs.aval)[i] << " + " << ((T*)m_vGates[idright].gs.aval)[i] << std::endl;
 #endif
 	}
 
@@ -414,12 +428,15 @@ void ArithSharing<T>::EvaluateMULCONSTGate(GATE* gate) {
 	const uint32_t nvals = gate->nvals;
 	const uint32_t idleft = gate->ingates.inputs.twin.left;
 	const uint32_t idright = gate->ingates.inputs.twin.right;
+#ifdef DEBUGARITH
+	std::cout << "[EvalLocalOp->ArithSharing::EvalMULCONST] idleft: " << idleft << ", idright: " << idright << std::endl;
+#endif
 	InstantiateGate(gate);
 	// Find first constant. Doesn't matter if 2nd is also a constant, which would be
 	// a weird circuit anyways...
 	GATE* gate_const = &(m_vGates[idleft]);
 	GATE* gate_var = &(m_vGates[idright]);
-	if (!(gate_const->type == G_CONSTANT)) std::swap(gate_const, gate_var);
+	if (!(gate_const->type == G_CONSTANT)) {std::swap(gate_const, gate_var);}
 	assert (gate_const->type == G_CONSTANT && "At least one of the inputs in a MULCONST gate must be a constant.");
 	// Current implementation of evaluation of CONST gates writes 0s to gs.aval
 	// array on CLIENT side, so we need to take constant from constant struct
@@ -427,7 +444,7 @@ void ArithSharing<T>::EvaluateMULCONSTGate(GATE* gate) {
 	for (uint32_t i = 0; i < nvals; ++i) {
 		((T*) gate->gs.aval)[i] = ((T*) gate_var->gs.aval)[i] * constval;
 #ifdef DEBUGARITH
-		std::cout << "Result MULCONST (" << i << "): "<< ((T*)gate->gs.aval)[i] << " = " << ((T*) gate_var->gs.aval)[i] << " * " << constval << std::endl;
+		std::cout << "[EvalLocalOp->ArithSharing::EvalMULCONST] Result MULCONST (" << i << "): ... = ... * ..."<< std::endl;
 #endif
 	}
 
@@ -441,7 +458,7 @@ void ArithSharing<T>::ShareValues(GATE* gate) {
 	T tmpval;
 
 #ifdef DEBUGARITH
-	std::cout << " m_vInputShareSndBuf before inst gate = ";
+	std::cout << "[ArithSharing::EvalInterOp->ShareVal] m_vInputShareSndBuf before inst gate = ";
 	m_vInputShareSndBuf.PrintHex();
 #endif
 
@@ -451,7 +468,8 @@ void ArithSharing<T>::ShareValues(GATE* gate) {
 		tmpval = m_vInputShareSndBuf.template Get<T>(m_nInputShareSndCtr);
 		((T*) gate->gs.aval)[i] = MOD_SUB(input[i], tmpval, m_nTypeBitMask);
 #ifdef DEBUGARITH
-		std::cout << "Shared: " << (uint64_t) ((T*)gate->gs.aval)[i] << " = " << (uint64_t) input[i] << " - " <<
+        // std::cout << "[ArithSharing::EvalInterOp->ShareVal] Input shared: ... = ... - ..., ..., inputid on this layer = ..., tmpval = ..." << std::endl;
+		std::cout << "[ArithSharing::EvalInterOp->ShareVal] Input shared: " << (uint64_t) ((T*)gate->gs.aval)[i] << " = " << (uint64_t) input[i] << " - " <<
 		(uint64_t) m_vInputShareSndBuf.template Get<T>(m_nInputShareSndCtr) << ", " << m_nTypeBitMask <<
 		", inputid on this layer = " << m_nInputShareSndCtr << ", tmpval = " << tmpval << std::endl;
 		m_vInputShareSndBuf.PrintHex();
@@ -467,11 +485,13 @@ void ArithSharing<T>::EvaluateCONVGate(GATE* gate) {
 	uint32_t nvals = gate->nvals;
 
 #ifdef DEBUGARITH
-	std::cout << "Values of B2A gates with id " << ((((uint64_t) gate)-((uint64_t)m_vGates.data()))/sizeof(GATE)) << ": ";
+    // std::cout << "[ArithSharing::EvalInterOp->EvalCONVGate] Values of B2A gates with id ...: ";
+	std::cout << "[ArithSharing::EvalInterOp->EvalCONVGate] Values of B2A gates with id " << ((((uint64_t) gate)-((uint64_t)m_vGates.data()))/sizeof(GATE)) << ": ";
 #endif
 	for (uint32_t i = 0; i < nparents; i++) {
-		if (m_vGates[parentids[i]].context == S_YAO)
+		if (m_vGates[parentids[i]].context == S_YAO){
 			std::cerr << "can't convert from yao representation directly into arithmetic" << std::endl;
+        }
 #ifdef DEBUGARITH
 		std::cout << (uint32_t) m_vGates[parentids[i]].gs.val[0];
 #endif
@@ -479,7 +499,7 @@ void ArithSharing<T>::EvaluateCONVGate(GATE* gate) {
 	}
 #ifdef DEBUGARITH
 	std::cout << std::endl;
-	std::cout << "Evaluating conv gate which has " << nvals << " values, current number of conv gates: " << m_vCONVGates.size() << std::endl;
+	std::cout << "[ArithSharing::EvalInterOp->EvalCONVGate] Evaluating conv gate which has " << nvals << " values, current number of conv gates: " << m_vCONVGates.size() << std::endl;
 #endif
 
 	m_vCONVGates.push_back(gate);
@@ -498,7 +518,7 @@ void ArithSharing<T>::EvaluateCONVGate(GATE* gate) {
 			m_nConvShareSndCtr += nvals;
 		}
 #ifdef DEBUGARITH
-		std::cout << "Conversion shares: ";
+		std::cout << "[ArithSharing::EvalInterOp->EvalCONVGate] Conversion shares: ";
 		m_vConvShareSndBuf.PrintBinary();
 #endif
 	}
@@ -511,17 +531,22 @@ void ArithSharing<T>::ReconstructValue(GATE* gate) {
 	for (uint32_t i = 0; i < gate->nvals; i++, m_nOutputShareSndCtr++) {
 		m_vOutputShareSndBuf.template Set<T>(((T*) m_vGates[parentid].gs.aval)[i], m_nOutputShareSndCtr);
 #ifdef DEBUGARITH
-		std::cout << "Sending output share: " << (uint64_t) ((T*)m_vGates[parentid].gs.aval)[i] << std::endl;
+		std::cout << "[ArithSharing::EvalInterOp->ReconstructVal] Sending output share: ..." << std::endl;
 #endif
 	}
-	if (gate->gs.oshare.dst != ALL)
+	if (gate->gs.oshare.dst != ALL){
 		UsedGate(parentid);
+    }
 }
 
 template<typename T>
 void ArithSharing<T>::SelectiveOpen(GATE* gate) {
 	uint32_t idleft = gate->ingates.inputs.twin.left;
 	uint32_t idright = gate->ingates.inputs.twin.right;
+
+#ifdef DEBUGARITH
+    std::cout << "[ArithSharing::EvalInterOp->SelectiveOpen] Evaluating MUL gate: idleft = " << idleft << ", idright = " << idright << std::endl;
+#endif
 
 	T d, e, x, y, a, b;
 	for (uint32_t i = 0; i < gate->nvals; i++, m_vMTIdx[0]++) {
@@ -544,14 +569,14 @@ template<typename T>
 void ArithSharing<T>::FinishCircuitLayer() {
 #ifdef DEBUGARITH
 	if(m_nInputShareRcvCtr > 0) {
-		std::cout << "Received "<< m_nInputShareRcvCtr << " input shares: ";
+		std::cout << "[ArithSharing::FinishCircLayer] Received "<< m_nInputShareRcvCtr << " input shares: ";
 		for(uint32_t i = 0; i < m_nInputShareRcvCtr; i++){
 			std::cout << m_vInputShareRcvBuf.template Get<T>(i) << std::endl;
 		}
 		//m_vInputShareRcvBuf.Print(0, m_nInputShareRcvCtr);
 	}
 	if(m_nOutputShareRcvCtr > 0) {
-		std::cout << "Received " << m_nOutputShareRcvCtr << " output shares: ";
+		std::cout << "[ArithSharing::FinishCircLayer] Received " << m_nOutputShareRcvCtr << " output shares: ";
 		for(uint32_t i = 0; i < m_nOutputShareRcvCtr; i++){
 			std::cout << m_vOutputShareRcvBuf.template Get<T>(i) << std::endl;
 		}
@@ -595,8 +620,9 @@ void ArithSharing<T>::EvaluateMTs() {
 			tempres = (tempres + (d * e)) & m_nTypeBitMask;
 		}
 #ifdef DEBUGARITH
-		std::cout << "mt result = " << (uint64_t) tempres << " = ((" << (uint64_t) a << " * " << (uint64_t) e << " ) + ( " << (uint64_t) b
-		<< " * " << (uint64_t) d << ") + " << (uint64_t) c << ")" << std::endl;
+        std::cout << "[FinishCircLayer->ArithSharing::EvalMTs] mt result = ... = ((... * ...) + (... * ...) + ...)" << std::endl;
+		// std::cout << "[FinishCircLayer->ArithSharing::EvalMTs] mt result = " << (uint64_t) tempres << " = ((" << (uint64_t) a << " * " << (uint64_t) e << " ) + ( " << (uint64_t) b
+		// << " * " << (uint64_t) d << ") + " << (uint64_t) c << ")" << std::endl;
 #endif
 		m_vResA[0].template Set<T>(tempres, i);
 	}
@@ -605,6 +631,9 @@ void ArithSharing<T>::EvaluateMTs() {
 template<typename T>
 void ArithSharing<T>::EvaluateMULGate() {
 	GATE* gate;
+#ifdef DEBUGARITH
+    std::cout << "[FinishCircLayer->ArithSharing::EvaluateMULGate]" << std::endl;
+#endif
 	for (uint32_t i = 0, idx = m_vMTStartIdx[0]; i < m_vMULGates.size() && idx < m_vMTIdx[0]; i++) {
 		gate = m_vMULGates[i];
 		InstantiateGate(gate);
@@ -627,7 +656,8 @@ void ArithSharing<T>::AssignInputShares() {
 		for (uint32_t j = 0; j < gate->nvals; j++, rcvshareidx++) {
 			((T*) gate->gs.aval)[j] = m_vInputShareRcvBuf.template Get<T>(rcvshareidx);
 #ifdef DEBUGARITH
-			std::cout << "Received inshare: " << (uint64_t) ((T*)gate->gs.aval)[j] << " = " << (uint64_t) m_vInputShareRcvBuf.template Get<T>(rcvshareidx) << std::endl;
+// std::cout << "[FinishCircuitLayer->ArithSharing::AssignInputShare] Received inshare: ... = ..." << std::endl;
+			std::cout << "[FinishCircuitLayer->ArithSharing::AssignInputShare] Received inshare: " << (uint64_t) ((T*)gate->gs.aval)[j] << " = " << (uint64_t) m_vInputShareRcvBuf.template Get<T>(rcvshareidx) << std::endl;
 #endif
 		}
 	}
@@ -645,8 +675,10 @@ void ArithSharing<T>::AssignOutputShares() {
 			((T*) gate->gs.val)[j] = (((T*) m_vGates[parentid].gs.aval)[j] + m_vOutputShareRcvBuf.template Get<T>(rcvshareidx))
 					& m_nTypeBitMask;
 #ifdef DEBUGARITH
-			std::cout << "Received output share: " << m_vOutputShareRcvBuf.template Get<T>(rcvshareidx) << std::endl;
-			std::cout << "Computed output: " << (uint64_t) ((T*)gate->gs.aval)[j] << " = " << (uint64_t) ((T*)m_vGates[parentid].gs.aval)[j] << " + " << (uint64_t) m_vOutputShareRcvBuf.template Get<T>(rcvshareidx) << std::endl;
+            // std::cout << "[FinishCircuitLayer->ArithSharing::AssignOutputShare] Received output share: ..." << std::endl;
+			// std::cout << "[FinishCircuitLayer->ArithSharing::AssignOutputShare] Computed output: ... = ... + ..." << std::endl;
+			std::cout << "[FinishCircuitLayer->ArithSharing::AssignOutputShare] Received output share: " << m_vOutputShareRcvBuf.template Get<T>(rcvshareidx) << std::endl;
+			std::cout << "[FinishCircuitLayer->ArithSharing::AssignOutputShare] Computed output: " << (uint64_t) ((T*)gate->gs.aval)[j] << " = " << (uint64_t) ((T*)m_vGates[parentid].gs.aval)[j] << " + " << (uint64_t) m_vOutputShareRcvBuf.template Get<T>(rcvshareidx) << std::endl;
 #endif
 		}
 		UsedGate(parentid);
@@ -655,6 +687,9 @@ void ArithSharing<T>::AssignOutputShares() {
 
 template<typename T>
 void ArithSharing<T>::AssignConversionShares() {
+#ifdef DEBUGARITH
+    std::cout << "[FinishCircLayer->ArithSharing::AssignConversionShares]" << std::endl;
+#endif    
 	if (m_eRole == SERVER) {
 		// Reset send counter in case we sent something this round
 		m_nConvShareSndCtr = 0;
@@ -725,11 +760,16 @@ void ArithSharing<T>::AssignServerConversionShares() {
 				tmpsum[k] += rnd;
 
 #ifdef DEBUGARITH
-				std::cout << "Gate " << i << ", " << j << ", " << k << ": " << rnd <<
+                // std::cout << "[ArithSharing::AssignServerConversionShares] Gate ..., ..., ...: ..., A: ..., ..., B: ..., ..., tmpsum = ..., gctr = ..." << std::endl;
+				std::cout << "[ArithSharing::AssignServerConversionShares] Gate " << i << ", " << j << ", " << k << ": " << rnd <<
 				", A: " << m_vConversionMasks[clientpermbit].template Get<T>(gctr) << ", " << tmpa <<
 				", B: " << m_vConversionMasks[!clientpermbit].template Get<T>(gctr) << ", " << tmpb << ", tmpsum = " << tmpsum[k] << ", gctr = " << gctr << std::endl;
+
+                //y: below is disabled
 				//std::cout << "gctr = " << gctr << ", nconvmasks = " << m_vConversionMasks[clientpermbit].GetSize() <<", nconvgates = " << m_nNumCONVs << std::endl;
-				assert(nvals == 1); // FIXME stupid assertion in debugging
+				
+                //y: what's this?
+                // assert(nvals == 1); // FIXME stupid assertion in debugging
 #endif
 
 				m_vConvShareSndBuf.template Set<T>(tmpa, 2 * lctr);
@@ -739,17 +779,18 @@ void ArithSharing<T>::AssignServerConversionShares() {
 		}
 		InstantiateGate(gate);
 #ifdef DEBUGARITH
-		std::cout << "Result for conversion gate: " << i << ": " << std::hex;
+        std::cout << "[ArithSharing::AssignServerConversionShares] Result for conversion gate: " << i << ": " << std::endl;
+		// std::cout << "[ArithSharing::AssignServerConversionShares] Result for conversion gate: " << i << ": " << std::hex; //y: cause stats wrong
 #endif
 		for (uint32_t k = 0; k < nvals; k++) {
 			((T*) gate->gs.aval)[k] = tmpsum[k];
 			//std::cout << "Gate val = " << ((T*) gate->gs.aval)[k] << std::endl;
 #ifdef DEBUGARITH
-			std::cout << tmpsum[k] << " ";
+			// std::cout << tmpsum[k] << " ";
 #endif
 		}
 #ifdef DEBUGARITH
-		std::cout << std::endl;
+		// std::cout << std::endl;
 #endif
 		free(parentids);
 	}
@@ -789,7 +830,8 @@ void ArithSharing<T>::AssignClientConversionShares() {
 				tmp = rcv ^ mask;
 				tmpsum[k] += tmp;
 #ifdef DEBUGARITH
-				std::cout << "Gate " << i << ", " << j << ", " << k << ": " << tmp << " = " << rcv << " ^ " << mask << ", tmpsum = " << tmpsum[k] << ", " <<
+                // std::cout << "[ArithSharing::AssignClientConversionShares] Gate ..., ..., ...: ... = ... ^ ..., tmpsum = ..., ..., gctr = ..." << std::endl;
+				std::cout << "[ArithSharing::AssignClientConversionShares] Gate " << i << ", " << j << ", " << k << ": " << tmp << " = " << rcv << " ^ " << mask << ", tmpsum = " << tmpsum[k] << ", " <<
 				((uint32_t) ((m_vGates[parentids[j]].gs.val[k / GATE_T_BITS] >> (k % GATE_T_BITS)) & 0x01)) << ", gctr = " << gctr << std::endl;
 #endif
 			}
@@ -798,16 +840,17 @@ void ArithSharing<T>::AssignClientConversionShares() {
 
 		InstantiateGate(gate);
 #ifdef DEBUGARITH
-		std::cout << "Result for conversion gate " << i << ": " << std::hex;
+        std::cout << "[ArithSharing::AssignClientConversionShares] Result for conversion gate " << i << ": " << std::endl;
+		// std::cout << "[ArithSharing::AssignClientConversionShares] Result for conversion gate " << i << ": " << std::hex;
 #endif
 		for (uint32_t k = 0; k < nvals; k++) {
 			((T*) gate->gs.aval)[k] = tmpsum[k];
 #ifdef DEBUGARITH
-			std::cout << tmpsum[k] << " ";
+			// std::cout << tmpsum[k] << " ";
 #endif
 		}
 #ifdef DEBUGARITH
-		std::cout << std::endl;
+		// std::cout << std::endl;
 #endif
 		free(parentids);
 	}
@@ -840,16 +883,30 @@ void ArithSharing<T>::GetDataToSend(std::vector<BYTE*>& sendbuf, std::vector<uin
 		sndbytes.push_back(m_nOutputShareSndCtr * sizeof(T));
 	}
 
+    std::cout << "[ArithSharing::GetDataToSend] sizeof(T) (e.g., T=uint32_t): " << sizeof(T) << std::endl;
 	//Conversion shares
 	if (m_nConvShareSndCtr > 0) {
+
 		sendbuf.push_back(m_vConvShareSndBuf.GetArr());
 		//the client sends shares of his choice bits, the server the masks
-		uint32_t snd_bytes = (m_eRole == CLIENT) ?
-			ceil_divide(m_nConvShareSndCtr, 8) : 2 * m_nConvShareSndCtr * sizeof(T);
+		// uint32_t snd_bytes = (m_eRole == CLIENT) ?
+		// 	ceil_divide(m_nConvShareSndCtr, 8) : 2 * m_nConvShareSndCtr * sizeof(T);
+
+        uint32_t snd_bytes;
+        if(m_eRole == CLIENT){
+            snd_bytes = ceil_divide(m_nConvShareSndCtr, 8);
+            std::cout << "[ArithSharing::GetDataToSend] (CLIENT) m_nConvShareSndCtr: " << m_nConvShareSndCtr << std::endl;
+            std::cout << "[ArithSharing::GetDataToSend] (CLIENT send ot choice bit) snd_bytes(ceil_divide(m_nConvShareSndCtr, 8)): " << snd_bytes << std::endl;
+        } else {
+            snd_bytes = 2 * m_nConvShareSndCtr * sizeof(T);
+            std::cout << "[ArithSharing::GetDataToSend] (SERVER) m_nConvShareSndCtr: " << m_nConvShareSndCtr << std::endl;
+            std::cout << "[ArithSharing::GetDataToSend] (SERVER send ot masks) snd_bytes(2 * m_nConvShareSndCtr * sizeof(T)): " << snd_bytes << std::endl;
+        }
 		sndbytes.push_back(snd_bytes);
 	}
 
 	uint32_t mtbytelen = (m_vMTIdx[0] - m_vMTStartIdx[0]) * sizeof(T);
+    std::cout << "[ArithSharing::GetDataToSend] mtbytelen: " << mtbytelen << std::endl;
 	//Selective openings
 	if (mtbytelen > 0) {
 		sendbuf.push_back(m_vD_snd[0].GetArr() + m_vMTStartIdx[0] * sizeof(T));
@@ -860,13 +917,13 @@ void ArithSharing<T>::GetDataToSend(std::vector<BYTE*>& sendbuf, std::vector<uin
 
 #ifdef DEBUGARITH
 	if(m_nInputShareSndCtr > 0) {
-		std::cout << "Sending " << m_nInputShareSndCtr << " Input shares : ";
+		std::cout << "[ArithSharing::GetDataToSend] Sending " << m_nInputShareSndCtr << " Input shares : ";
 		for(uint32_t i = 0; i < m_nInputShareSndCtr; i++) {
 			std::cout << m_vInputShareSndBuf.template Get<T>(i) << std::endl;
 		}
 	}
 	if(m_nOutputShareSndCtr > 0) {
-		std::cout << "Sending " << m_nOutputShareSndCtr << " Output shares : ";
+		std::cout << "[ArithSharing::GetDataToSend] Sending " << m_nOutputShareSndCtr << " Output shares : ";
 		for(uint32_t i = 0; i < m_nOutputShareSndCtr; i++){
 			std::cout << m_vOutputShareSndBuf.template Get<T>(i) << std::endl;
 		}
@@ -874,11 +931,12 @@ void ArithSharing<T>::GetDataToSend(std::vector<BYTE*>& sendbuf, std::vector<uin
 	}
 
 	if(mtbytelen > 0) {
-		std::cout << "Sending 2* " << (m_vMTIdx[0] - m_vMTStartIdx[0]) << " MTs" << std::endl;
+		std::cout << "[ArithSharing::GetDataToSend] Sending 2* " << (m_vMTIdx[0] - m_vMTStartIdx[0]) << " MTs" << "; each MT is " << sizeof(T) << " byte" << std::endl;
+
 	}
 
 	if(m_nConvShareSndCtr > 0) {
-		std::cout << "Sending values for	" << m_nConvShareSndCtr << " conversion gates ( " << m_vCONVGates.size() << "gates in total)"<< std::endl;
+		std::cout << "[ArithSharing::GetDataToSend] Sending values for	" << m_nConvShareSndCtr << " conversion gates ( " << m_vCONVGates.size() << " gates in total)"<< std::endl;
 	}
 #endif
 }
@@ -930,11 +988,11 @@ void ArithSharing<T>::GetBuffersToReceive(std::vector<BYTE*>& rcvbuf, std::vecto
 
 #ifdef DEBUGARITH
 	if(mtbytelen > 0) {
-		std::cout << "Receiving 2* " << (m_vMTIdx[0] - m_vMTStartIdx[0]) << " MTs" << std::endl;
+		std::cout << "[ArithSharing::GetBuffToRcv] Receiving 2* " << (m_vMTIdx[0] - m_vMTStartIdx[0]) << " MTs" << std::endl;
 	}
 
 	if(m_nConvShareRcvCtr > 0) {
-		std::cout << "Receiving values for	" << m_nConvShareRcvCtr << " conversion gates" << std::endl;
+		std::cout << "[ArithSharing::GetBuffToRcv] Receiving values for	" << m_nConvShareRcvCtr << " conversion gates" << std::endl;
 	}
 #endif
 }
@@ -952,7 +1010,7 @@ void ArithSharing<T>::EvaluateSIMDGate(uint32_t gateid) {
 
 	if (gate->type == G_COMBINE) {
 #ifdef DEBUGSHARING
-		std::cout << " which is a COMBINE gate" << std::endl;
+		std::cout << "[EvalLocalOp->ArithSharing::EvalSIMDGate] eval a COMBINE gate" << std::endl;
 #endif
 		uint32_t* input = gate->ingates.inputs.parents;
 		uint32_t nparents = gate->ingates.ningates;
@@ -968,7 +1026,7 @@ void ArithSharing<T>::EvaluateSIMDGate(uint32_t gateid) {
 		free(input);
 	} else if (gate->type == G_SPLIT) {
 #ifdef DEBUGSHARING
-		std::cout << " which is a SPLIT gate" << std::endl;
+		std::cout << "[EvalLocalOp->ArithSharing::EvalSIMDGate] eval a SPLIT gate" << std::endl;
 #endif
 		uint32_t pos = gate->gs.sinput.pos;
 		uint32_t idparent = gate->ingates.inputs.parent;
@@ -981,7 +1039,7 @@ void ArithSharing<T>::EvaluateSIMDGate(uint32_t gateid) {
 		UsedGate(idparent);
 	} else if (gate->type == G_REPEAT) {
 #ifdef DEBUGSHARING
-		std::cout << " which is a REPEATER gate" << std::endl;
+		std::cout << "[EvalLocalOp->ArithSharing::EvalSIMDGate] eval a REPEAT gate" << std::endl;
 #endif
 		uint32_t idparent = gate->ingates.inputs.parent; //gate->gs.rinput;
 		InstantiateGate(gate);
@@ -992,7 +1050,7 @@ void ArithSharing<T>::EvaluateSIMDGate(uint32_t gateid) {
 		UsedGate(idparent);
 	} else if (gate->type == G_PERM) {
 #ifdef DEBUGSHARING
-		std::cout << " which is a PERMUTATION gate" << std::endl;
+		std::cout << "[EvalLocalOp->ArithSharing::EvalSIMDGate] eval a PERM gate" << std::endl;
 #endif
 		uint32_t* perm = gate->ingates.inputs.parents;
 		uint32_t* pos = gate->gs.perm.posids;
@@ -1011,7 +1069,7 @@ void ArithSharing<T>::EvaluateSIMDGate(uint32_t gateid) {
 		free(pos);
 	} else if (gate->type == G_COMBINEPOS) {
 #ifdef DEBUGSHARING
-		std::cout << " which is a COMBINEPOS gate" << std::endl;
+		std::cout << "[EvalLocalOp->ArithSharing::EvalSIMDGate] eval a COMBINEPOS gate" << std::endl;
 #endif
 		uint32_t* combinepos = gate->ingates.inputs.parents;
 		uint32_t arraypos = gate->gs.combinepos.pos;
@@ -1027,7 +1085,7 @@ void ArithSharing<T>::EvaluateSIMDGate(uint32_t gateid) {
 		free(combinepos);
 	} else if (gate->type == G_SUBSET) {
 #ifdef DEBUGSHARING
-		std::cout << " which is a SUBSET gate" << std::endl;
+		std::cout << "[EvalLocalOp->ArithSharing::EvalSIMDGate] eval a SUBSET gate" << std::endl;
 #endif
 		uint32_t idparent = gate->ingates.inputs.parent;
 		uint32_t* positions = gate->gs.sub_pos.posids; //gate->gs.combinepos.input;
@@ -1132,7 +1190,7 @@ uint32_t ArithSharing<T>::GetOutput(CBitVector& out) {
 
 template<typename T>
 void ArithSharing<T>::PrintPerformanceStatistics() {
-	std::cout << "Arithmetic Sharing: MULs: " << m_nMTs << " ; Depth: " << GetMaxCommunicationRounds() << std::endl;
+	std::cout << "[ArithSharing::PrintPerformStat] Arithmetic Sharing: MULs: " << m_nMTs << " ; Depth: " << GetMaxCommunicationRounds() << std::endl;
 }
 
 template<typename T>

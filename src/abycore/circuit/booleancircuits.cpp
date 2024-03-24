@@ -898,6 +898,8 @@ uint32_t BooleanCircuit::PutUniversalGateCircuit(uint32_t a, uint32_t b, uint32_
 
 share* BooleanCircuit::PutADDGate(share* ina, share* inb) {
 	//also output the carry of the result as long as the additional carry does not exceed the maximum bit length of the higher of both inputs
+    std::cout << "a bitlength: " << ina->get_bitlength() << "; maxbitlength: " << ina->get_max_bitlength() << std::endl;
+    std::cout << "b bitlength: " << inb->get_bitlength() << "; maxbitlength: " << inb->get_max_bitlength() << std::endl;
 	bool carry = std::max(ina->get_bitlength(), inb->get_bitlength()) < std::max(ina->get_max_bitlength(), inb->get_max_bitlength());
 	return new boolshare(PutAddGate(ina->get_wires(), inb->get_wires(), carry), this);
 }
@@ -997,6 +999,7 @@ std::vector<uint32_t> BooleanCircuit::PutSizeOptimizedAddGate(std::vector<uint32
 
 //TODO: there is a bug when adding 3 and 1 as two 2-bit numbers and expecting a carry
 std::vector<uint32_t> BooleanCircuit::PutDepthOptimizedAddGate(std::vector<uint32_t> a, std::vector<uint32_t> b, BOOL bCARRY, bool vector_and) {
+    // std::cout << "\n***Construt Depth Optimized Add Gate***" << std::endl;
 	PadWithLeadingZeros(a, b);
 	uint32_t id, inputbitlen = std::min(a.size(), b.size());
 	std::vector<uint32_t> out(a.size() + bCARRY);
@@ -1014,9 +1017,21 @@ std::vector<uint32_t> BooleanCircuit::PutDepthOptimizedAddGate(std::vector<uint3
 		parity_zero[i] = parity[i];
 		carry[i] = PutANDGate(a[i], b[i]);
 	}
+    // std::cout << "(part1) Put " << inputbitlen << " bit XOR gates (0th-layer)" << std::endl;
+    // std::cout << "(part1) Put " << inputbitlen << " bit AND gates (0th-layer)\n" << std::endl;
 
+
+    int mux_cnt = 0;
+    int xor_cnt = 0;
+    int and_cnt = 0;
+    // std::cout << "lp count (i): " << (uint32_t) ceil(log(inputbitlen) / log(2))-1 << std::endl;
+    // std::cout << "lp count (i->j): " << inputbitlen << std::endl << std::endl;
 	for (uint32_t i = 1; i <= (uint32_t) ceil(log(inputbitlen) / log(2)); i++) {
 		for (uint32_t j = 0; j < inputbitlen; j++) {
+            // std::cout << "j: " << j << std::endl;
+            // std::cout << "pow(2, i): " << pow(2, i) << std::endl;
+            // std::cout << "pow(2, (i-1)): " << pow(2, (i-1)) << std::endl;
+            // std::cout << "Evaluate condition: j % pow(2, i) >= pow(2, (i - 1)): " << (j % (uint32_t) pow(2, i) >= pow(2, (i - 1))) << std::endl << std::endl;
 			if (j % (uint32_t) pow(2, i) >= pow(2, (i - 1))) {
 				id = pow(2, (i - 1)) + pow(2, i) * ((uint32_t) floor(j / (pow(2, i)))) - 1;
 				if(m_eContext == S_BOOL && vector_and) {
@@ -1027,20 +1042,36 @@ std::vector<uint32_t> BooleanCircuit::PutDepthOptimizedAddGate(std::vector<uint3
 					//carry[j] = PutINVGate(PutANDGate(PutINVGate(s_out->get_wire(0)), PutINVGate(carry[j])));
 					carry[j] = PutXORGate(s_out->get_wire_id(0), carry[j]);
 					parity[j] = s_out->get_wire_id(1);
+                    mux_cnt++;
+                    xor_cnt++;
 				} else {
 					//carry[j] = PutINVGate(PutANDGate(PutINVGate(PutANDGate(parity[j], carry[id])), PutINVGate(carry[j]))); // c = (p and c-1) or c = (((p and c-1) xor 1) and (c xor 1)) xor 1)
 					carry[j] = PutXORGate(carry[j], PutANDGate(parity[j], carry[id])); // c = c XOR (p and c-1), from ShallowCC
 					parity[j] = PutANDGate(parity[j], parity[id]);
+                    xor_cnt++;
+                    and_cnt+=2;
 				}
 			}
 		}
 	}
+
+    // std::cout << "(part2) Put " << mux_cnt << " bit MUX gates" << std::endl;
+    // std::cout << "(part2) Put " << xor_cnt << " bit XOR gates" << std::endl;
+    // std::cout << "(part2) Put " << and_cnt << " bit AND gates\n" << std::endl;
+
 	out[0] = parity_zero[0];
 	for (uint32_t i = 1; i < inputbitlen; i++) {
 		out[i] = PutXORGate(parity_zero[i], carry[i - 1]);
 	}
+    // std::cout << "(part3) Put " << inputbitlen-1 << " bit XOR gates" << std::endl;
 	if (bCARRY)	//Do I expect a carry in the most significant bit position?
 		out[inputbitlen] = carry[inputbitlen - 1];
+        // std::cout << "out[" << inputbitlen << "] is a carry bit (?)\n" << std::endl;
+
+    // std::cout << "Put total " << mux_cnt << " bit MUX gates" << std::endl;
+    // std::cout << "Put total " << inputbitlen + xor_cnt + (inputbitlen-1) << " XOR gates" << std::endl;
+    // std::cout << "Put total " << inputbitlen + and_cnt << " AND gates" << std::endl;
+    // std::cout << "***Done Construting Add Gate***\n" << std::endl;
 
 	delete zero_share;
 	delete ina;

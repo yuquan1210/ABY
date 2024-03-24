@@ -330,8 +330,8 @@ uint32_t ABYCircuit::PutUniversalGate(uint32_t inleft, uint32_t inright, uint32_
 	gate->gs.ttable = op_id;
 
 #ifdef DEBUG_CIRCUIT_CONSTRUCTION
-	cout << "New Universal Gate with id: " << currentGateId() << ", left in = " << inleft << ", right in = " << inright << ", nvals = " << gate->nvals <<
-	", depth = " << gate->depth << ", sharingsize = " << gate->sharebitlen << ", nrounds = " << gate->nrounds << ", and operation_id = " << op_id << endl;
+	std::cout << "New Universal Gate with id: " << currentGateId() << ", left in = " << inleft << ", right in = " << inright << ", nvals = " << gate->nvals <<
+	", depth = " << gate->depth << ", sharingsize = " << gate->sharebitlen << ", nrounds = " << gate->nrounds << ", and operation_id = " << op_id << std::endl;
 #endif
 
 	return currentGateId();

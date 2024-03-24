@@ -24,6 +24,8 @@
 #include <cassert>
 #include <vector>
 
+#include "../../microbench/common/cost_calculator.h"
+
 class BooleanCircuit;
 
 uint64_t verify_min_euclidean_dist(uint32_t** serverdb, uint32_t* clientquery, uint32_t dbsize, uint32_t dim);

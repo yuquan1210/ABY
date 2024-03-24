@@ -81,7 +81,7 @@ ABYParty::ABYParty(e_role pid, const std::string& addr, uint16_t port, seclvl se
 
 	//m_aSeed = (uint8_t*) malloc(sizeof(uint8_t) * m_cCrypt->get_hash_bytes());
 
-#ifndef BATCH
+#ifdef BATCH
 	std::cout << "Performing Init" << std::endl;
 #endif
 
@@ -93,7 +93,7 @@ ABYParty::ABYParty(e_role pid, const std::string& addr, uint16_t port, seclvl se
 	m_pCircuit = NULL;
 	StopWatch("Time for initiatlization: ", P_INIT);
 
-#ifndef BATCH
+#ifdef BATCH
 	std::cout << "Generating circuit" << std::endl;
 #endif
 	StartWatch("Generating circuit", P_CIRCUIT);
@@ -106,7 +106,7 @@ ABYParty::ABYParty(e_role pid, const std::string& addr, uint16_t port, seclvl se
 
 void ABYParty::ConnectAndBaseOTs() {
 	if (!is_online) {
-#ifndef BATCH
+#ifdef BATCH
 		std::cout << "Establishing network connection" << std::endl;
 #endif
 		//Establish network connection
@@ -117,13 +117,20 @@ void ABYParty::ConnectAndBaseOTs() {
 		}
 		StopWatch("Time for network connect: ", P_NETWORK);
 
-#ifndef BATCH
+#ifdef BATCH
 		std::cout << "Performing base OTs" << std::endl;
 #endif
 		/* Pre-Compute Naor-Pinkas base OTs by starting two threads */
+
+        uint64_t actual_snd_begin_0 = this->m_vSockets[0]->getSndCnt();
+        uint64_t actual_snd_begin_1 = this->m_vSockets[1]->getSndCnt();
 		StartRecording("Starting NP OT", P_BASE_OT, m_vSockets);
 		m_pSetup->PrepareSetupPhase(m_tComm.get());
 		StopRecording("Time for NP OT: ", P_BASE_OT, m_vSockets);
+        uint64_t actual_snd_end_0 = this->m_vSockets[0]->getSndCnt();
+        uint64_t actual_snd_end_1 = this->m_vSockets[1]->getSndCnt();
+        std::cout << "[ABYParty::ConnectAndBaseOT] actual sent during m_pSetup->PrepareSetupPhase() thru sock0: " << (actual_snd_end_0 - actual_snd_begin_0) << " byte" << std::endl;
+        std::cout << "[ABYParty::ConnectAndBaseOT] actual sent during m_pSetup->PrepareSetupPhase() thru sock1: " << (actual_snd_end_1 - actual_snd_begin_1) << " byte" << std::endl;
 
 		is_online = true;
 	}
@@ -184,7 +191,7 @@ void ABYParty::Cleanup() {
 
 void ABYParty::ExecCircuit() {
 
-#ifndef BATCH
+#ifdef BATCH
 	std::cout << "Finishing circuit generation" << std::endl;
 #endif
 
@@ -195,21 +202,27 @@ void ABYParty::ExecCircuit() {
 	//Setup phase
 	StartRecording("Starting setup phase: ", P_SETUP, m_vSockets);
 	for (uint32_t i = 0; i < m_vSharings.size(); i++) {
-#ifndef BATCH
+#ifdef BATCH
 		std::cout << "Preparing setup phase for " << m_vSharings[i]->sharing_type() << " sharing" << std::endl;
 #endif
 		m_vSharings[i]->PrepareSetupPhase(m_pSetup.get());
 	}
 
-#ifndef BATCH
+#ifdef BATCH
 	std::cout << "Preforming OT extension" << std::endl;
 #endif
+    uint64_t performSetup_actual_snd_begin_0 = m_vSockets[0]->getSndCnt();
+    uint64_t performSetup_actual_snd_begin_1 = m_vSockets[1]->getSndCnt();
 	StartRecording("Starting OT Extension", P_OT_EXT, m_vSockets);
 	m_pSetup->PerformSetupPhase();
 	StopRecording("Time for OT Extension phase: ", P_OT_EXT, m_vSockets);
+    uint64_t performSetup_actual_snd_end_0 = m_vSockets[0]->getSndCnt();
+    uint64_t performSetup_actual_snd_end_1 = m_vSockets[1]->getSndCnt();
+    std::cout << "Actual sent during m_pSetup->PrepareSetupPhase() thru sock0: " << (performSetup_actual_snd_end_0 - performSetup_actual_snd_begin_0) << " byte" << std::endl;
+    std::cout << "Actual sent during m_pSetup->PrepareSetupPhase() thru sock1: " << (performSetup_actual_snd_end_1 - performSetup_actual_snd_begin_1) << " byte" << std::endl;
 
 	for (uint32_t i = 0; i < m_vSharings.size(); i++) {
-#ifndef BATCH
+#ifdef BATCH
 		std::cout << "Performing setup phase for " << m_vSharings[i]->sharing_type() << " sharing" << std::endl;
 #endif
 		if(i == S_YAO) {
@@ -236,7 +249,7 @@ void ABYParty::ExecCircuit() {
 	}
 	StopRecording("Time for setup phase: ", P_SETUP, m_vSockets);
 
-#ifndef BATCH
+#ifdef BATCH
 	std::cout << "Evaluating circuit" << std::endl;
 #endif
 
@@ -302,7 +315,7 @@ BOOL ABYParty::InitCircuit(uint32_t bitlen, uint32_t reservegates, const std::st
 
 	m_vGates = &(m_pCircuit->GatesVec());
 
-#ifndef BATCH
+#ifdef BATCH
 	std::cout << " circuit initialized..." << std::endl;
 #endif
 
@@ -332,16 +345,17 @@ BOOL ABYParty::EvaluateCircuit() {
 		maxdepth = std::max(maxdepth, m_vSharings[i]->GetMaxCommunicationRounds());
 	}
 #if DEBUGABYPARTY
-	std::cout << "Starting online evaluation with maxdepth = " << maxdepth << std::endl;
+	std::cout << "[ABYParty::EvaluateCircuit] Starting online evaluation with maxdepth = " << maxdepth << std::endl;
 #endif
 	//Evaluate Circuit layerwise;
 	for (uint32_t depth = 0; depth < maxdepth; depth++, m_nDepth++) {
 #if DEBUGABYPARTY
-		std::cout << "Starting evaluation on depth " << depth << std::endl << std::flush;
+        std::cout << "\n******************************************************************" << std::endl;
+		std::cout << "[ABYParty::EvaluateCircuit] Starting evaluation on depth " << depth << std::endl << std::flush;
 #endif
 		for (uint32_t i = 0; i < m_vSharings.size(); i++) {
 #if DEBUGABYPARTY
-			std::cout << "Evaluating local operations of sharing " << i << " on depth " << depth << std::endl;
+			std::cout << "[ABYParty::EvaluateCircuit] Evaluating local operations of sharing " << i << " on depth " << depth << std::endl;
 #endif
 #if BENCHONLINEPHASE
 			clock_gettime(CLOCK_MONOTONIC, &tstart);
@@ -353,7 +367,7 @@ BOOL ABYParty::EvaluateCircuit() {
 			clock_gettime(CLOCK_MONOTONIC, &tstart);
 #endif
 #if DEBUGABYPARTY
-			std::cout << "Evaluating interactive operations of sharing " << i << std::endl;
+			std::cout << "[ABYParty::EvaluateCircuit] Evaluating interactive operations of sharing " << i << std::endl;
 #endif
 			m_vSharings[i]->EvaluateInteractiveOperations(depth);
 #if BENCHONLINEPHASE
@@ -362,7 +376,7 @@ BOOL ABYParty::EvaluateCircuit() {
 #endif
 		}
 #if DEBUGABYPARTY
-		std::cout << "Finished with evaluating operations on depth = " << depth << ", continuing with interactions" << std::endl;
+		std::cout << "[ABYParty::EvaluateCircuit] Finished with evaluating operations on depth = " << depth << ", continuing with interactions" << std::endl;
 #endif
 #if BENCHONLINEPHASE
 		clock_gettime(CLOCK_MONOTONIC, &tstart);
@@ -373,7 +387,7 @@ BOOL ABYParty::EvaluateCircuit() {
 		interaction += getMillies(tstart, tend);
 #endif
 #if DEBUGABYPARTY
-		std::cout << "Done performing interaction, having sharings wrap up this circuit layer" << std::endl;
+		std::cout << "[ABYParty::EvaluateCircuit] Done performing interaction, having sharings wrap up this circuit layer" << std::endl;
 #endif
 		for (uint32_t i = 0; i < m_vSharings.size(); i++) {
 #if BENCHONLINEPHASE
@@ -388,7 +402,7 @@ BOOL ABYParty::EvaluateCircuit() {
 		}
 	}
 #if DEBUGABYPARTY
-		std::cout << "Done with online phase; synchronizing "<< std::endl;
+		std::cout << "[ABYParty::EvaluateCircuit] Done with online phase; synchronizing "<< std::endl;
 #endif
 	m_tPartyChan->synchronize_end();
 	delete m_tPartyChan;
@@ -423,7 +437,7 @@ BOOL ABYParty::ThreadSendValues(uint32_t id) {
 			//m_tPartyChan->send(sendbuf[j][i], sndbytes[j][i]);
 #ifdef DEBUGCOMM
 			cout_mutex.lock();
-			std::cout << "(" << m_nDepth << ") Sending " << sndbytes[j][i] << " bytes on socket " << m_eRole << " for sharing " << j << std::endl;
+			std::cout << "[PerformInter->ABYParty::ThreadSendVal] (depth: " << m_nDepth << ") Sending " << sndbytes[j][i] << " bytes on socket " << m_eRole << " for sharing " << j << std::endl;
 			cout_mutex.unlock();
 #endif
 		}
@@ -440,10 +454,16 @@ BOOL ABYParty::ThreadSendValues(uint32_t id) {
 		}
 	}
 	//gettimeofday(&tstart, NULL);
+    // y: get socket start count 
+    uint64_t actual_snd_begin = this->m_vSockets[0]->getSndCnt();
 	if(snd_buf_size_total > 0) {
 		//m_vSockets[2]->Send(snd_buf_total, snd_buf_size_total);
 		m_tPartyChan->blocking_send(m_vThreads[id]->GetEvent(), snd_buf_total, snd_buf_size_total);
 	}
+    // y: print actual sent vs. sent buf total here
+    uint64_t actual_snd_end = this->m_vSockets[0]->getSndCnt();
+    std::cout << "[PerformInter->ABYParty::ThreadSendVal] snd_buf_size_total: " << snd_buf_size_total << " byte" << std::endl;
+    std::cout << "[PerformInter->ABYParty::ThreadSendVal] actual sent thru sock0: " << (actual_snd_end - actual_snd_begin) << " byte" << std::endl;
 	free(snd_buf_total);
 
 	return true;
@@ -463,7 +483,7 @@ BOOL ABYParty::ThreadReceiveValues() {
 			//	m_tPartyChan->blocking_receive(sendbuf[j][i], sndbytes[j][i]);
 #ifdef DEBUGCOMM
 			cout_mutex.lock();
-			std::cout << "(" << m_nDepth << ") Receiving " << rcvbytes[j][i] << " bytes on socket " << (m_eRole^1) << " for sharing " << j << std::endl;
+			std::cout << "[PerformInter->ABYParty::ThreadRcvVal] (depth: " << m_nDepth << ") Receiving " << rcvbytes[j][i] << " bytes on socket " << (m_eRole^1) << " for sharing " << j << std::endl;
 			cout_mutex.unlock();
 #endif
 		}
@@ -539,9 +559,9 @@ void ABYParty::bench_aes() const {
 BOOL ABYParty::EstablishConnection() {
 	BOOL success = false;
 	if (m_eRole == SERVER) {
-		/*#ifndef BATCH
+		 #ifdef BATCH
 		 std::cout << "Server starting to listen" << std::endl;
-		 #endif*/
+		 #endif
 		success = ABYPartyListen();
 	} else { //CLIENT
 		success = ABYPartyConnect();

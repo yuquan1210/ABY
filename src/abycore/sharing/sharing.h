@@ -25,7 +25,7 @@
 #include "../ABY_utils/ABYconstants.h"
 #include <cstdint>
 #include <vector>
-//#define DEBUGSHARING
+#define DEBUGSHARING
 
 class ABYCircuit;
 class ABYSetup;

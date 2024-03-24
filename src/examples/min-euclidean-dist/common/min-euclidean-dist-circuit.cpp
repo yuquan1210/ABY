@@ -29,6 +29,10 @@ int32_t test_min_eucliden_dist_circuit(e_role role, const std::string& address, 
 	ABYParty* party = new ABYParty(role, address, port, seclvl, maxbitlen, nthreads, mt_alg);
 	std::vector<Sharing*>& sharings = party->GetSharings();
 
+    Circuit* ac = sharings[S_ARITH]->GetCircuitBuildRoutine();
+	Circuit* yc = sharings[S_YAO] ->GetCircuitBuildRoutine();
+	Circuit* bc = sharings[S_BOOL]->GetCircuitBuildRoutine();
+
 	/**
 		Setting the precomputation value being passed as the precomputation mode of operation.
 		Currently precomputation phases only active for GMW based implementations.
@@ -96,6 +100,7 @@ int32_t test_min_eucliden_dist_circuit(e_role role, const std::string& address, 
 
 	mindst = mincirc->PutOUTGate(mindst, ALL);
 
+    CalculateAllCircuitCost(ac, bc, yc);
 	party->ExecCircuit();
 	/**
 		Condition check added because in Precomputation store mode. Online phase is skipped therefore,

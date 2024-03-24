@@ -102,7 +102,7 @@ void YaoServerSharing::PrepareSetupPhase(ABYSetup* setup) {
 	m_vR.SetBit(symbits - 1, 1);
 
 #ifdef DEBUGYAOSERVER
-	std::cout << "Secret key generated: ";
+	std::cout << "[YaoServerShar::PrepSetup] Secret key generated: ";
 	PrintKey(m_vR.GetArr());
 	std::cout << std::endl;
 #endif
@@ -116,9 +116,9 @@ void YaoServerSharing::PrepareSetupPhase(ABYSetup* setup) {
 	//CreateRandomWireKeys(m_vConversionInputKeys, m_nConversionInputBits);
 
 #ifdef DEBUGYAOSERVER
-	std::cout << "Server input keys: ";
+	std::cout << "[YaoServerShar::PrepSetup] Server input keys: ";
 	m_vServerInputKeys.PrintHex();
-	std::cout << "Client input keys: ";
+	std::cout << "[YaoServerShar::PrepSetup] Client input keys: ";
 	m_vClientInputKeys.PrintHex();
 #endif
 
@@ -162,7 +162,7 @@ void YaoServerSharing::PerformSetupPhase(ABYSetup* setup) {
 
 void YaoServerSharing::FinishSetupPhase(ABYSetup* setup) {
 	/* If no gates were built, return */
-
+    std::cout << "[YaoServerShar::FinishSetup] ..." << std::endl;
 	m_nOutputDestionationsCtr = 0;
 	if (m_cBoolCircuit->GetMaxDepth() == 0)
 		return;
@@ -225,7 +225,7 @@ void YaoServerSharing::EvaluateInteractiveOperations(uint32_t depth) {
 	for (uint32_t i = 0; i < interactivequeue.size(); i++) {
 		gate = &(m_vGates[interactivequeue[i]]);
 #ifdef DEBUGYAOSERVER
-		std::cout << "Evaluating gate with id = " << interactivequeue[i] << ", and type = "<< get_gate_type_name(gate->type) << ", and depth = " << gate->depth << std::endl;
+		std::cout << "[YaoServerShar::EvalInterOp] Evaluating gate with id = " << interactivequeue[i] << ", and type = "<< get_gate_type_name(gate->type) << ", and depth = " << gate->depth << std::endl;
 #endif
 		switch (gate->type) {
 		case G_IN:
@@ -256,7 +256,7 @@ void YaoServerSharing::EvaluateInteractiveOperations(uint32_t depth) {
 			EvaluateCallbackGate(interactivequeue[i]);
 			break;
 		default:
-			std::cerr << "Interactive Operation not recognized: " << (uint32_t) gate->type << " (" << get_gate_type_name(gate->type) << "), stopping execution" << std::endl;
+			std::cerr << "[YaoServerShar::EvalInterOp] Interactive Operation not recognized: " << (uint32_t) gate->type << " (" << get_gate_type_name(gate->type) << "), stopping execution" << std::endl;
 			std::exit(EXIT_FAILURE);
 		}
 
@@ -343,22 +343,33 @@ void YaoServerSharing::CreateAndSendGarbledCircuit(ABYSetup* setup) {
 	//Store the shares of the clients output gates
 	CollectClientOutputShares();
 
+    std::string p_str = "";
 	//Send the garbled circuit and the output mapping to the client
 	if (m_nANDGates > 0 && m_nGarbledTableSndCtr < m_nGarbledTableCtr) {
-		setup->AddSendTask(m_vGarbledCircuit.GetArr() + m_nGarbledTableSndCtr * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE,
+        // std::cout << "[PerformSetup->CreateAndSendGarbCirc] condition (m_nANDGates > 0 && m_nGarbledTableSndCtr < m_nGarbledTableCtr): " << (m_nANDGates > 0 && m_nGarbledTableSndCtr < m_nGarbledTableCtr) << std::endl;
+        std::cout << "[PerformSetup->CreateAndSendGarbCirc] (m_nGarbledTableCtr - m_nGarbledTableSndCtr): " << m_nGarbledTableCtr - m_nGarbledTableSndCtr << std::endl;
+        std::cout << "[PerformSetup->CreateAndSendGarbCirc] m_nSecParamBytes: " << m_nSecParamBytes << std::endl;
+        std::cout << "[PerformSetup->CreateAndSendGarbCirc] AddSendTask sndbytes ((m_nGarbledTableCtr - m_nGarbledTableSndCtr) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE) " << (m_nGarbledTableCtr - m_nGarbledTableSndCtr) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE << " bytes" << std::endl;
+        setup->AddSendTask(m_vGarbledCircuit.GetArr() + m_nGarbledTableSndCtr * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE,
 				(m_nGarbledTableCtr - m_nGarbledTableSndCtr) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE);
 		m_nGarbledTableSndCtr = m_nGarbledTableCtr;
 	}
-	if (m_nUNIVGates > 0)
-		setup->AddSendTask(m_vUniversalGateTable.GetArr(), m_nUNIVGates * m_nSecParamBytes * KEYS_PER_UNIV_GATE_IN_TABLE);
+
+	if (m_nUNIVGates > 0){
+        std::cout << "[PerformSetup->CreateAndSendGarbCirc] (m_nUNIVGates > 0) AddSendTask sndbytes (m_nUNIVGates * m_nSecParamBytes * KEYS_PER_UNIV_GATE_IN_TABLE): " << m_nUNIVGates * m_nSecParamBytes * KEYS_PER_UNIV_GATE_IN_TABLE << " bytes" << std::endl;
+        setup->AddSendTask(m_vUniversalGateTable.GetArr(), m_nUNIVGates * m_nSecParamBytes * KEYS_PER_UNIV_GATE_IN_TABLE);
+    }
+
 	if (m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT) > 0) {
-		setup->AddSendTask(m_vOutputShareSndBuf.GetArr(), ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8));
+        std::cout << "[PerformSetup->CreateAndSendGarbCirc] (Bool_circ_CLIENT_output_bit > 0) AddSendTask sndbytes (ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8)): " << ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8) << " bytes" << std::endl;
+        setup->AddSendTask(m_vOutputShareSndBuf.GetArr(), ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8)); 
 	}
+    std::cout << p_str;
 #ifdef DEBUGYAOSERVER
-	std::cout << "Sending Garbled Circuit: ";
-	m_vGarbledCircuit.PrintHex();
-	std::cout << "Sending my output shares: ";
-	m_vOutputShareSndBuf.Print(0, m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT));
+	std::cout << "[PerformSetup->YaoServerShar::CreateAndSendGarbCirc] Sending Garbled Circuit of size: " << m_vGarbledCircuit.GetSize() << " bytes" << std::endl;
+	// m_vGarbledCircuit.PrintHex();
+	std::cout << "[PerformSetup->YaoServerShar::CreateAndSendGarbCirc] Sending my output shares of size " << m_vOutputShareSndBuf.GetSize() << " bytes" << std::endl;
+	// m_vOutputShareSndBuf.Print(0, m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT));
 #endif
 
 }
@@ -367,7 +378,7 @@ void YaoServerSharing::PrecomputeGC(std::deque<uint32_t>& queue, ABYSetup* setup
 	for (uint32_t i = 0; i < queue.size(); i++) {
 		GATE* gate = &(m_vGates[queue[i]]);
 #ifdef DEBUGYAOSERVER
-		std::cout << "Evaluating gate with id = " << queue[i] << ", and type = "<< get_gate_type_name(gate->type) << "(" << gate->type << "), depth = " << gate->depth
+		std::cout << "[PerformSetup->CreateAndSendGarbCirc->YaoServerShar::PrecomputeGC] Evaluating gate with id = " << queue[i] << ", and type = "<< get_gate_type_name(gate->type) << "(" << gate->type << "), depth = " << gate->depth
 		<< ", nvals = " << gate->nvals << ", sharebitlen = " << gate->sharebitlen << std::endl;
 #endif
 		assert(gate->nvals > 0 && gate->sharebitlen == 1);
@@ -599,6 +610,9 @@ void YaoServerSharing::EvaluateANDGate(GATE* gate, ABYSetup* setup) {
 
 	if((m_nGarbledTableCtr - m_nGarbledTableSndCtr) >= GARBLED_TABLE_WINDOW) {
 		//setup->AddSendTask(m_vGarbledCircuit.GetArr(), m_nGarbledTableCtr * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE);
+        std::cout << "[PerformSetup->CreateAndSendGarbCirc->PrecomputeGC->EvalAND] (m_nGarbledTableCtr - m_nGarbledTableSndCtr): " << m_nGarbledTableCtr - m_nGarbledTableSndCtr << std::endl;
+        std::cout << "[PerformSetup->CreateAndSendGarbCirc->PrecomputeGC->EvalAND] m_nSecParamBytes: " << m_nSecParamBytes << std::endl;
+        std::cout << "[PerformSetup->CreateAndSendGarbCirc->PrecomputeGC->EvalAND] AddSendTask sending " << (m_nGarbledTableCtr - m_nGarbledTableSndCtr) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE << " bytes" << std::endl;
 		setup->AddSendTask(m_vGarbledCircuit.GetArr() + m_nGarbledTableSndCtr * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE,
 				(m_nGarbledTableCtr - m_nGarbledTableSndCtr) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE);
 		m_nGarbledTableSndCtr = m_nGarbledTableCtr;
@@ -679,7 +693,8 @@ void YaoServerSharing::CreateGarbledTable(GATE* ggate, uint32_t pos, GATE* gleft
 		ggate->gs.yinput.pi[pos] = (outwire_key[m_nSecParamBytes-1] & 0x01) ^ ((lpbit) & (rpbit));
 	}
 
-#ifdef DEBUGYAOSERVER
+    std::cout << "[YaoServerShar::CreateGarblTable] ..." << std::endl;
+#ifndef DEBUGYAOSERVER
 		std::cout << " encr : ";
 		PrintKey(lkey);
 		std::cout << " (" << (uint32_t) gleft->gs.yinput.pi[pos] << ") and : ";
@@ -836,7 +851,7 @@ void YaoServerSharing::GetDataToSend(std::vector<BYTE*>& sendbuf, std::vector<ui
 	//Input keys of server
 	if (m_nServerKeyCtr > 0) {
 #ifdef DEBUGYAOSERVER
-		std::cout << "want to send servers input keys which are of size " << m_nServerKeyCtr * m_nSecParamBytes << " bytes" << std::endl;
+		std::cout << "[YaoServerSharing::GetDataToSend] want to send servers input keys which are of size " << m_nServerKeyCtr * m_nSecParamBytes << " bytes" << std::endl;
 		std::cout << "Server input keys = ";
 		m_vServerKeySndBuf.PrintHex();
 #endif
@@ -846,7 +861,7 @@ void YaoServerSharing::GetDataToSend(std::vector<BYTE*>& sendbuf, std::vector<ui
 	//Input keys of client
 	if (m_nClientInputKeyCtr > 0) {
 #ifdef DEBUGYAOSERVER
-		std::cout << "want to send client input keys which are of size 2 * " << m_nClientInputKeyCtr * m_nSecParamBytes << " bytes" << std::endl;
+		std::cout << "[YaoServerSharing::GetDataToSend] want to send client input keys which are of size 2 * " << m_nClientInputKeyCtr * m_nSecParamBytes << " bytes" << std::endl;
 		std::cout << "Client input keys[0] = ";
 		m_vClientKeySndBuf[0].PrintHex();
 		std::cout << "Client input keys[1] = ";
@@ -876,6 +891,7 @@ void YaoServerSharing::FinishCircuitLayer() {
 						m_pKeyOps->XOR(m_vClientKeySndBuf[1].GetArr() + linbitctr * m_nSecParamBytes, m_vROTMasks[1].GetArr() + m_nClientInputKexIdx * m_nSecParamBytes,
 								m_vClientInputKeys.GetArr() + m_nClientInputKexIdx * m_nSecParamBytes); //Zero - key
 #ifdef DEBUGYAOSERVER
+                                        std::cout << "[YaoServerShar::FinishCircLayer]" << std::endl;
 										std::cout << "T0: ";
 										PrintKey(m_vClientKeySndBuf[0].GetArr() + linbitctr * m_nSecParamBytes);
 										std::cout << " = ";
@@ -899,6 +915,7 @@ void YaoServerSharing::FinishCircuitLayer() {
 						m_pKeyOps->XOR(m_vClientKeySndBuf[1].GetArr() + linbitctr * m_nSecParamBytes, m_vROTMasks[1].GetArr() + m_nClientInputKexIdx * m_nSecParamBytes,
 								m_bTempKeyBuf); //One - key
 #ifdef DEBUGYAOSERVER
+                                std::cout << "[YaoServerShar::FinishCircLayer]" << std::endl;
 								std::cout << "T0: ";
 								PrintKey(m_vClientKeySndBuf[0].GetArr() + linbitctr * m_nSecParamBytes);
 								std::cout << " = ";
@@ -934,7 +951,7 @@ void YaoServerSharing::FinishCircuitLayer() {
 						//std::cout << "done copying keys" << std::endl;
 					}
 #ifdef DEBUGYAOSERVER
-					std::cout << "Processing keys for gate " << gateid << ", perm-bit = " << (uint32_t) m_vGates[gateid].gs.yinput.pi[k] <<
+					std::cout << "[YaoServerShar::FinishCircLayer] Processing keys for gate " << gateid << ", perm-bit = " << (uint32_t) m_vGates[gateid].gs.yinput.pi[k] <<
 					", client-cor: " << (uint32_t) m_vClientROTRcvBuf.GetBitNoMask(linbitctr) << std::endl;
 
 					PrintKey(m_vClientInputKeys.GetArr() + m_nClientInputKexIdx * m_nSecParamBytes);
