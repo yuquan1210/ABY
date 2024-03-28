@@ -23,7 +23,7 @@
 #include <algorithm>
 #include "../circuit/arithmeticcircuits.h"
 
-#define DEBUGARITH
+// #define DEBUGARITH
 //#define VERIFY_ARITH_MT
 
 template<typename T>

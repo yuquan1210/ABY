@@ -90,8 +90,9 @@ void BoolSharing::InitNewLayer() {
 
 void BoolSharing::PrepareSetupPhase(ABYSetup* setup) {
 	m_nNumANDSizes = m_cBoolCircuit->GetANDs(m_vANDs);
+#ifdef DEBUGBOOL
     std::cout << "[BoolSharing::PrepareSetupPhase] m_nNumANDSizes: " << m_nNumANDSizes << std::endl;
-
+#endif
 	/**Checking the role of the executor. Based on the role a specific file is selected.*/
 	//TODO use strings
 	char filename[21];
@@ -110,15 +111,16 @@ void BoolSharing::PrepareSetupPhase(ABYSetup* setup) {
 		m_nNumMTs[i] = m_vANDs[i].numgates > 0? m_vANDs[i].numgates + (8 * m_cBoolCircuit->GetMaxDepth()) : m_vANDs[i].numgates;
 		m_nTotalNumMTs += m_vANDs[i].numgates;
 	}
-
+#ifdef DEBUGBOOL
     std::cout << "[BoolSharing::PrepareSetupPhase] number of AND bits (gates in bit): " << m_nTotalNumMTs << std::endl; //m_nTotalNumMTs now just added total num and bit
-
+#endif
 	//8*circuit_depth are needed since the mtidx is padded to the next byte after each layer
 	if (m_nTotalNumMTs > 0)
 		m_nTotalNumMTs += (8 * m_cBoolCircuit->GetMaxDepth());
-
+#ifdef DEBUGBOOL
     std::cout << "[BoolSharing::PrepareSetupPhase] Circuit Max Depth: " << m_cBoolCircuit->GetMaxDepth() << std::endl;
     std::cout << "[BoolSharing::PrepareSetupPhase] Total Num MTs: " << m_nTotalNumMTs << std::endl;
+#endif
 	InitializeMTs();
 
 	/**
@@ -199,13 +201,15 @@ void BoolSharing::PrepareSetupPhaseMTs(ABYSetup* setup) {
 					task->pval.rcvval.C = &(m_vA[i]);
 					task->pval.rcvval.R = &(m_vS[i]);
 				}
-#ifdef BATCH
+#ifdef DEBUGBOOL
 				std::cout << "[BoolSharing::PrepSetupPhase->PrepSetupMTs] Adding new OT task for " << task->numOTs << " OTs on " << task->bitlen << " bit-strings" << std::endl;
 #endif
 				setup->AddOTTask(task, j);
 			}
 		}
+#ifdef DEBUGBOOL
         std::cout << "[BoolSharing::PrepSetupPhase->PrepSetupMTs] Added (2 * m_nNumANDSizes) " << 2*m_nNumANDSizes << " (IKNP)OT tasks" << std::endl;
+#endif	
 	}
 }
 
@@ -486,7 +490,7 @@ void BoolSharing::PrepareOnlinePhase() {
 	uint32_t insharercvbits = m_cBoolCircuit->GetNumInputBitsForParty(m_eRole==SERVER ? CLIENT : SERVER);
 	uint32_t outsharercvbits = m_cBoolCircuit->GetNumOutputBitsForParty(m_eRole);
 
-#ifdef BATCH
+#ifdef DEBUGBOOL
 	std::cout << "[BoolSharing::PrepOnline] insharesndbits = " << insharesndbits << std::endl;
 #endif
 
@@ -637,8 +641,10 @@ void BoolSharing::EvaluateLocalOperations(uint32_t depth) {
 			if (IsSIMDGate(gate->type)) {
 				EvaluateSIMDGate(localops[i]);
 			} else {
+#ifdef DEBUGBOOL
 				std::cerr << "[BoolSharing::EvalLocalOp] Boolsharing: Non-interactive Operation not recognized: " << (uint32_t) gate->type
 						<< "(" << get_gate_type_name(gate->type) << "), stopping execution" << std::endl;
+#endif
 				std::exit(EXIT_FAILURE);
 			}
 			break;
@@ -689,8 +695,10 @@ void BoolSharing::EvaluateInteractiveOperations(uint32_t depth) {
 			EvaluateCallbackGate(interactiveops[i]);
 			break;
 		default:
+#ifdef DEBUGBOOL
 			std::cerr << "[BoolSharing::EvalInterOp] Boolsharing: Interactive Operation not recognized: " << (uint32_t) gate->type
 				<< " (" << get_gate_type_name(gate->type) << "), stopping execution" << std::endl;
+#endif
 			std::exit(EXIT_FAILURE);
 		}
 	}
@@ -1535,7 +1543,9 @@ uint32_t BoolSharing::GetOutput(CBitVector& out) {
 }
 
 void BoolSharing::PrintPerformanceStatistics() {
+#ifdef DEBUGBOOL
 	std::cout << "[BoolSharing::PerformStats] Boolean Sharing: ANDs: ";
+#endif
 	uint64_t total_non_vec_ANDs = 0;
 	uint64_t total_vec_ANDs = 0;
 	for (uint32_t i = 0; i < m_nNumANDSizes; i++) {

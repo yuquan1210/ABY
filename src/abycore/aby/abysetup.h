@@ -46,7 +46,7 @@ struct comm_ctx {
 };
 
 
-#define DEBUGSETUP
+// #define DEBUGSETUP
 //define BENCH_PRECOMP
 
 /* Unification for the required OTs */

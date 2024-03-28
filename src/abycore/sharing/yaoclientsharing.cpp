@@ -130,7 +130,9 @@ void YaoClientSharing::PrepareOnlinePhase() {
 }
 
 void YaoClientSharing::ReceiveGarbledCircuitAndOutputShares(ABYSetup* setup) {
-    std::cout << "[PerformSetup->YaoClientShar::RcvGarbCircAndOutputShar] ..." << std::endl;
+#ifdef DEBUGYAOCLIENT    
+	std::cout << "[PerformSetup->YaoClientShar::RcvGarbCircAndOutputShar] ..." << std::endl;
+#endif	
 	if (m_nANDGates > 0){
 		setup->AddReceiveTask(m_vGarbledCircuit.GetArr(), ((uint64_t) m_nANDGates) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE);
     }
@@ -341,9 +343,10 @@ BOOL YaoClientSharing::EvaluateGarbledTable(GATE* gate, uint32_t pos, GATE* glef
 		m_pKeyOps->XOR(okey, okey, gtptr+m_nSecParamBytes);//gc_xor(okey, okey, gtptr+BYTES_SSP);
 		m_pKeyOps->XOR(okey, okey, lkey);//gc_xor(okey, okey, gtptr+BYTES_SSP);
 	}
-
+#ifdef DEBUGYAOCLIENT
     std::cout << "[YaoClientShar::EvalGarblTable] ..." << std::endl;
-#ifndef DEBUGYAOCLIENT
+#endif
+#ifdef DEBUGYAOCLIENT
 		std::cout << " using: ";
 		PrintKey(lkey);
 		std::cout << " (" << (uint32_t) lpbit << ") and : ";
@@ -555,7 +558,7 @@ void YaoClientSharing::GetDataToSend(std::vector<BYTE*>& sendbuf, std::vector<ui
 		sndbytes.push_back(ceil_divide(m_nServerOutputShareCtr, 8));
 	}
 
-#ifdef DEBUGYAO
+#ifdef DEBUGYAOCLIENT
 	// if(m_nInputShareSndSize > 0) {
 	// 	std::cout << "Sending " << m_nInputShareSndSize << " Input shares : ";
 	// 	m_vInputShareSndBuf.Print(0, m_nInputShareSndSize);

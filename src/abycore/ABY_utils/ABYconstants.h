@@ -27,8 +27,8 @@
 
 //#define ABYDEBUG
 //#define PRINT_OUTPUT
-#define DEBUGCOMM
-#define DEBUGABYPARTY 1
+// #define DEBUGCOMM
+// #define DEBUGABYPARTY
 
 #define PRINT_PERFORMANCE_STATS 1 //prints overall runtime statistics and gate counts
 #define PRINT_COMMUNICATION_STATS 1 //prints communication statistics

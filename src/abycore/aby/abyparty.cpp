@@ -81,7 +81,7 @@ ABYParty::ABYParty(e_role pid, const std::string& addr, uint16_t port, seclvl se
 
 	//m_aSeed = (uint8_t*) malloc(sizeof(uint8_t) * m_cCrypt->get_hash_bytes());
 
-#ifdef BATCH
+#ifdef DEBUGABYPARTY
 	std::cout << "Performing Init" << std::endl;
 #endif
 
@@ -93,7 +93,7 @@ ABYParty::ABYParty(e_role pid, const std::string& addr, uint16_t port, seclvl se
 	m_pCircuit = NULL;
 	StopWatch("Time for initiatlization: ", P_INIT);
 
-#ifdef BATCH
+#ifdef DEBUGABYPARTY
 	std::cout << "Generating circuit" << std::endl;
 #endif
 	StartWatch("Generating circuit", P_CIRCUIT);
@@ -106,7 +106,7 @@ ABYParty::ABYParty(e_role pid, const std::string& addr, uint16_t port, seclvl se
 
 void ABYParty::ConnectAndBaseOTs() {
 	if (!is_online) {
-#ifdef BATCH
+#ifdef DEBUGABYPARTY
 		std::cout << "Establishing network connection" << std::endl;
 #endif
 		//Establish network connection
@@ -117,7 +117,7 @@ void ABYParty::ConnectAndBaseOTs() {
 		}
 		StopWatch("Time for network connect: ", P_NETWORK);
 
-#ifdef BATCH
+#ifdef DEBUGABYPARTY
 		std::cout << "Performing base OTs" << std::endl;
 #endif
 		/* Pre-Compute Naor-Pinkas base OTs by starting two threads */
@@ -129,9 +129,10 @@ void ABYParty::ConnectAndBaseOTs() {
 		StopRecording("Time for NP OT: ", P_BASE_OT, m_vSockets);
         uint64_t actual_snd_end_0 = this->m_vSockets[0]->getSndCnt();
         uint64_t actual_snd_end_1 = this->m_vSockets[1]->getSndCnt();
-        std::cout << "[ABYParty::ConnectAndBaseOT] actual sent during m_pSetup->PrepareSetupPhase() thru sock0: " << (actual_snd_end_0 - actual_snd_begin_0) << " byte" << std::endl;
+#ifdef DEBUGABYPARTY       
+		std::cout << "[ABYParty::ConnectAndBaseOT] actual sent during m_pSetup->PrepareSetupPhase() thru sock0: " << (actual_snd_end_0 - actual_snd_begin_0) << " byte" << std::endl;
         std::cout << "[ABYParty::ConnectAndBaseOT] actual sent during m_pSetup->PrepareSetupPhase() thru sock1: " << (actual_snd_end_1 - actual_snd_begin_1) << " byte" << std::endl;
-
+#endif
 		is_online = true;
 	}
 }
@@ -191,7 +192,7 @@ void ABYParty::Cleanup() {
 
 void ABYParty::ExecCircuit() {
 
-#ifdef BATCH
+#ifdef DEBUGABYPARTY
 	std::cout << "Finishing circuit generation" << std::endl;
 #endif
 
@@ -202,13 +203,13 @@ void ABYParty::ExecCircuit() {
 	//Setup phase
 	StartRecording("Starting setup phase: ", P_SETUP, m_vSockets);
 	for (uint32_t i = 0; i < m_vSharings.size(); i++) {
-#ifdef BATCH
+#ifdef DEBUGABYPARTY
 		std::cout << "Preparing setup phase for " << m_vSharings[i]->sharing_type() << " sharing" << std::endl;
 #endif
 		m_vSharings[i]->PrepareSetupPhase(m_pSetup.get());
 	}
 
-#ifdef BATCH
+#ifdef DEBUGABYPARTY
 	std::cout << "Preforming OT extension" << std::endl;
 #endif
     uint64_t performSetup_actual_snd_begin_0 = m_vSockets[0]->getSndCnt();
@@ -218,11 +219,13 @@ void ABYParty::ExecCircuit() {
 	StopRecording("Time for OT Extension phase: ", P_OT_EXT, m_vSockets);
     uint64_t performSetup_actual_snd_end_0 = m_vSockets[0]->getSndCnt();
     uint64_t performSetup_actual_snd_end_1 = m_vSockets[1]->getSndCnt();
-    std::cout << "Actual sent during m_pSetup->PrepareSetupPhase() thru sock0: " << (performSetup_actual_snd_end_0 - performSetup_actual_snd_begin_0) << " byte" << std::endl;
+#ifdef DEBUGABYPARTY    
+	std::cout << "Actual sent during m_pSetup->PrepareSetupPhase() thru sock0: " << (performSetup_actual_snd_end_0 - performSetup_actual_snd_begin_0) << " byte" << std::endl;
     std::cout << "Actual sent during m_pSetup->PrepareSetupPhase() thru sock1: " << (performSetup_actual_snd_end_1 - performSetup_actual_snd_begin_1) << " byte" << std::endl;
+#endif
 
 	for (uint32_t i = 0; i < m_vSharings.size(); i++) {
-#ifdef BATCH
+#ifdef DEBUGABYPARTY
 		std::cout << "Performing setup phase for " << m_vSharings[i]->sharing_type() << " sharing" << std::endl;
 #endif
 		if(i == S_YAO) {
@@ -249,7 +252,7 @@ void ABYParty::ExecCircuit() {
 	}
 	StopRecording("Time for setup phase: ", P_SETUP, m_vSockets);
 
-#ifdef BATCH
+#ifdef DEBUGABYPARTY
 	std::cout << "Evaluating circuit" << std::endl;
 #endif
 
@@ -315,7 +318,7 @@ BOOL ABYParty::InitCircuit(uint32_t bitlen, uint32_t reservegates, const std::st
 
 	m_vGates = &(m_pCircuit->GatesVec());
 
-#ifdef BATCH
+#ifdef DEBUGABYPARTY
 	std::cout << " circuit initialized..." << std::endl;
 #endif
 
@@ -327,9 +330,14 @@ BOOL ABYParty::EvaluateCircuit() {
 	timespec tstart, tend;
 	uint32_t num_sharings = m_vSharings.size();
 	double interaction = 0;
+	double currInteraction = 0;
 	std::vector<double> localops(num_sharings,0);
 	std::vector<double> interactiveops(num_sharings,0);
 	std::vector<double> fincirclayer(num_sharings,0);
+
+	std::vector<double> currLocalops(num_sharings,0);
+	std::vector<double> currInteractiveops(num_sharings,0);
+	std::vector<double> currFincirclayer(num_sharings,0);
 #endif
 	m_nDepth = 0;
 
@@ -344,17 +352,17 @@ BOOL ABYParty::EvaluateCircuit() {
 	for (uint32_t i = 0; i < m_vSharings.size(); i++) {
 		maxdepth = std::max(maxdepth, m_vSharings[i]->GetMaxCommunicationRounds());
 	}
-#if DEBUGABYPARTY
+#ifdef DEBUGABYPARTY
 	std::cout << "[ABYParty::EvaluateCircuit] Starting online evaluation with maxdepth = " << maxdepth << std::endl;
 #endif
 	//Evaluate Circuit layerwise;
 	for (uint32_t depth = 0; depth < maxdepth; depth++, m_nDepth++) {
-#if DEBUGABYPARTY
+#ifdef DEBUGABYPARTY
         std::cout << "\n******************************************************************" << std::endl;
 		std::cout << "[ABYParty::EvaluateCircuit] Starting evaluation on depth " << depth << std::endl << std::flush;
 #endif
 		for (uint32_t i = 0; i < m_vSharings.size(); i++) {
-#if DEBUGABYPARTY
+#ifdef DEBUGABYPARTY
 			std::cout << "[ABYParty::EvaluateCircuit] Evaluating local operations of sharing " << i << " on depth " << depth << std::endl;
 #endif
 #if BENCHONLINEPHASE
@@ -363,30 +371,38 @@ BOOL ABYParty::EvaluateCircuit() {
 			m_vSharings[i]->EvaluateLocalOperations(depth);
 #if BENCHONLINEPHASE
 			clock_gettime(CLOCK_MONOTONIC, &tend);
+			SaveLocalOpTiming(getMillies(tstart, tend), i);
+			currLocalops[i] = getMillies(tstart, tend);
 			localops[i] += getMillies(tstart, tend);
 			clock_gettime(CLOCK_MONOTONIC, &tstart);
+			// StartWatch("start inter op", sharingInterops[i]);
 #endif
-#if DEBUGABYPARTY
+#ifdef DEBUGABYPARTY
 			std::cout << "[ABYParty::EvaluateCircuit] Evaluating interactive operations of sharing " << i << std::endl;
 #endif
 			m_vSharings[i]->EvaluateInteractiveOperations(depth);
 #if BENCHONLINEPHASE
 			clock_gettime(CLOCK_MONOTONIC, &tend);
+			SaveInterOpTiming(getMillies(tstart, tend), i);
 			interactiveops[i] += getMillies(tstart, tend);
+			currInteractiveops[i] = getMillies(tstart, tend);
 #endif
 		}
-#if DEBUGABYPARTY
+#ifdef DEBUGABYPARTY
 		std::cout << "[ABYParty::EvaluateCircuit] Finished with evaluating operations on depth = " << depth << ", continuing with interactions" << std::endl;
 #endif
 #if BENCHONLINEPHASE
 		clock_gettime(CLOCK_MONOTONIC, &tstart);
+		// StartWatch("start interact", sharingInterops[i]);
 #endif
 		PerformInteraction();
 #if BENCHONLINEPHASE
 		clock_gettime(CLOCK_MONOTONIC, &tend);
+		SaveInteractionTiming(getMillies(tstart, tend));
 		interaction += getMillies(tstart, tend);
+		currInteraction = getMillies(tstart, tend);
 #endif
-#if DEBUGABYPARTY
+#ifdef DEBUGABYPARTY
 		std::cout << "[ABYParty::EvaluateCircuit] Done performing interaction, having sharings wrap up this circuit layer" << std::endl;
 #endif
 		for (uint32_t i = 0; i < m_vSharings.size(); i++) {
@@ -397,25 +413,36 @@ BOOL ABYParty::EvaluateCircuit() {
 			m_vSharings[i]->FinishCircuitLayer();
 #if BENCHONLINEPHASE
 			clock_gettime(CLOCK_MONOTONIC, &tend);
+			SaveFinishLayerTiming(getMillies(tstart, tend), i);
 			fincirclayer[i] += getMillies(tstart, tend);
+			currFincirclayer[i] = getMillies(tstart, tend);
 #endif
 		}
+// #if BENCHONLINEPHASE
+// 		std::cout << "\nOnline time at layer " << depth << ": " << std::endl;
+// 		std::cout << "Bool: local gates: " << currLocalops[S_BOOL] << ", interactive gates: " << currInteractiveops[S_BOOL] << ", layer finish: " << currFincirclayer[S_BOOL] << std::endl;
+// 		std::cout << "Yao: local gates: " << currLocalops[S_YAO] << ", interactive gates: " << currInteractiveops[S_YAO] << ", layer finish: " << currFincirclayer[S_YAO] << std::endl;
+// 		std::cout << "Yao Rev: local gates: " << currLocalops[S_YAO_REV] << ", interactive gates: " << currInteractiveops[S_YAO_REV] << ", layer finish: " << currFincirclayer[S_YAO_REV] << std::endl;
+// 		std::cout << "Arith: local gates: " << currLocalops[S_ARITH] << ", interactive gates: " << currInteractiveops[S_ARITH] << ", layer finish: " << currFincirclayer[S_ARITH] << std::endl;
+// 		std::cout << "SPLUT: local gates: " << currLocalops[S_SPLUT] << ", interactive gates: " << currInteractiveops[S_SPLUT] << ", layer finish: " << currFincirclayer[S_SPLUT] << std::endl;
+// 		std::cout << "Communication: " << currInteraction << std::endl << std::endl;
+// #endif
 	}
-#if DEBUGABYPARTY
+#ifdef DEBUGABYPARTY
 		std::cout << "[ABYParty::EvaluateCircuit] Done with online phase; synchronizing "<< std::endl;
 #endif
 	m_tPartyChan->synchronize_end();
 	delete m_tPartyChan;
 
-#if BENCHONLINEPHASE
-	std::cout << "Online time is distributed as follows: " << std::endl;
-	std::cout << "Bool: local gates: " << localops[S_BOOL] << ", interactive gates: " << interactiveops[S_BOOL] << ", layer finish: " << fincirclayer[S_BOOL] << std::endl;
-	std::cout << "Yao: local gates: " << localops[S_YAO] << ", interactive gates: " << interactiveops[S_YAO] << ", layer finish: " << fincirclayer[S_YAO] << std::endl;
-	std::cout << "Yao Rev: local gates: " << localops[S_YAO_REV] << ", interactive gates: " << interactiveops[S_YAO_REV] << ", layer finish: " << fincirclayer[S_YAO_REV] << std::endl;
-	std::cout << "Arith: local gates: " << localops[S_ARITH] << ", interactive gates: " << interactiveops[S_ARITH] << ", layer finish: " << fincirclayer[S_ARITH] << std::endl;
-	std::cout << "SPLUT: local gates: " << localops[S_SPLUT] << ", interactive gates: " << interactiveops[S_SPLUT] << ", layer finish: " << fincirclayer[S_SPLUT] << std::endl;
-	std::cout << "Communication: " << interaction << std::endl << std::endl;
-#endif
+// #if BENCHONLINEPHASE
+// 	std::cout << "Online time is distributed as follows: " << std::endl;
+// 	std::cout << "Bool: local gates: " << localops[S_BOOL] << ", interactive gates: " << interactiveops[S_BOOL] << ", layer finish: " << fincirclayer[S_BOOL] << std::endl;
+// 	std::cout << "Yao: local gates: " << localops[S_YAO] << ", interactive gates: " << interactiveops[S_YAO] << ", layer finish: " << fincirclayer[S_YAO] << std::endl;
+// 	std::cout << "Yao Rev: local gates: " << localops[S_YAO_REV] << ", interactive gates: " << interactiveops[S_YAO_REV] << ", layer finish: " << fincirclayer[S_YAO_REV] << std::endl;
+// 	std::cout << "Arith: local gates: " << localops[S_ARITH] << ", interactive gates: " << interactiveops[S_ARITH] << ", layer finish: " << fincirclayer[S_ARITH] << std::endl;
+// 	std::cout << "SPLUT: local gates: " << localops[S_SPLUT] << ", interactive gates: " << interactiveops[S_SPLUT] << ", layer finish: " << fincirclayer[S_SPLUT] << std::endl;
+// 	std::cout << "Communication: " << interaction << std::endl << std::endl;
+// #endif
 	return true;
 }
 
@@ -462,8 +489,10 @@ BOOL ABYParty::ThreadSendValues(uint32_t id) {
 	}
     // y: print actual sent vs. sent buf total here
     uint64_t actual_snd_end = this->m_vSockets[0]->getSndCnt();
+#ifdef DEBUGCOMM
     std::cout << "[PerformInter->ABYParty::ThreadSendVal] snd_buf_size_total: " << snd_buf_size_total << " byte" << std::endl;
     std::cout << "[PerformInter->ABYParty::ThreadSendVal] actual sent thru sock0: " << (actual_snd_end - actual_snd_begin) << " byte" << std::endl;
+#endif	
 	free(snd_buf_total);
 
 	return true;
@@ -559,7 +588,7 @@ void ABYParty::bench_aes() const {
 BOOL ABYParty::EstablishConnection() {
 	BOOL success = false;
 	if (m_eRole == SERVER) {
-		 #ifdef BATCH
+		 #ifdef DEBUGABYPARTY
 		 std::cout << "Server starting to listen" << std::endl;
 		 #endif
 		success = ABYPartyListen();
@@ -636,11 +665,29 @@ void ABYParty::Reset() {
 		m_vSharings[i]->Reset();
 	}
 
+	clearTimings();
+
 	m_pCircuit->Reset();
 }
 
 double ABYParty::GetTiming(ABYPHASE phase) {
 	return GetTimeForPhase(phase);
+}
+
+std::vector<std::vector<double>> ABYParty::GetLocalOpTimings() {
+	return GetLocalOpTimingsFromTimer();
+}
+
+std::vector<std::vector<double>> ABYParty::GetInterOpTimings() {
+	return GetInterOpTimingsFromTimer();
+}
+
+std::vector<std::vector<double>> ABYParty::GetFinishLayerTimings() {
+	return GetFinishLayerTimingsFromTimer();
+}
+
+std::vector<double> ABYParty::GetInteractionTimings() {
+	return GetInteractionTimingsFromTimer();
 }
 
 uint64_t ABYParty::GetSentData(ABYPHASE phase) {

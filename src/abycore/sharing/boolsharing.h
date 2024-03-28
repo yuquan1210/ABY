@@ -28,7 +28,7 @@
 
 class XORMasking;
 
-#define DEBUGBOOL
+// #define DEBUGBOOL
 //#define BENCHBOOLTIME
 /**
  BOOL SHARING - <DETAILED EXPLANATION PLEASE>

@@ -162,7 +162,9 @@ void YaoServerSharing::PerformSetupPhase(ABYSetup* setup) {
 
 void YaoServerSharing::FinishSetupPhase(ABYSetup* setup) {
 	/* If no gates were built, return */
-    std::cout << "[YaoServerShar::FinishSetup] ..." << std::endl;
+#ifdef DEBUGYAOSERVER    
+	std::cout << "[YaoServerShar::FinishSetup] ..." << std::endl;
+#endif
 	m_nOutputDestionationsCtr = 0;
 	if (m_cBoolCircuit->GetMaxDepth() == 0)
 		return;
@@ -347,22 +349,28 @@ void YaoServerSharing::CreateAndSendGarbledCircuit(ABYSetup* setup) {
 	//Send the garbled circuit and the output mapping to the client
 	if (m_nANDGates > 0 && m_nGarbledTableSndCtr < m_nGarbledTableCtr) {
         // std::cout << "[PerformSetup->CreateAndSendGarbCirc] condition (m_nANDGates > 0 && m_nGarbledTableSndCtr < m_nGarbledTableCtr): " << (m_nANDGates > 0 && m_nGarbledTableSndCtr < m_nGarbledTableCtr) << std::endl;
-        std::cout << "[PerformSetup->CreateAndSendGarbCirc] (m_nGarbledTableCtr - m_nGarbledTableSndCtr): " << m_nGarbledTableCtr - m_nGarbledTableSndCtr << std::endl;
+#ifdef DEBUGYAOSERVER        
+		std::cout << "[PerformSetup->CreateAndSendGarbCirc] (m_nGarbledTableCtr - m_nGarbledTableSndCtr): " << m_nGarbledTableCtr - m_nGarbledTableSndCtr << std::endl;
         std::cout << "[PerformSetup->CreateAndSendGarbCirc] m_nSecParamBytes: " << m_nSecParamBytes << std::endl;
         std::cout << "[PerformSetup->CreateAndSendGarbCirc] AddSendTask sndbytes ((m_nGarbledTableCtr - m_nGarbledTableSndCtr) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE) " << (m_nGarbledTableCtr - m_nGarbledTableSndCtr) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE << " bytes" << std::endl;
+#endif
         setup->AddSendTask(m_vGarbledCircuit.GetArr() + m_nGarbledTableSndCtr * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE,
 				(m_nGarbledTableCtr - m_nGarbledTableSndCtr) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE);
 		m_nGarbledTableSndCtr = m_nGarbledTableCtr;
 	}
 
 	if (m_nUNIVGates > 0){
-        std::cout << "[PerformSetup->CreateAndSendGarbCirc] (m_nUNIVGates > 0) AddSendTask sndbytes (m_nUNIVGates * m_nSecParamBytes * KEYS_PER_UNIV_GATE_IN_TABLE): " << m_nUNIVGates * m_nSecParamBytes * KEYS_PER_UNIV_GATE_IN_TABLE << " bytes" << std::endl;
+#ifdef DEBUGYAOSERVER        
+		std::cout << "[PerformSetup->CreateAndSendGarbCirc] (m_nUNIVGates > 0) AddSendTask sndbytes (m_nUNIVGates * m_nSecParamBytes * KEYS_PER_UNIV_GATE_IN_TABLE): " << m_nUNIVGates * m_nSecParamBytes * KEYS_PER_UNIV_GATE_IN_TABLE << " bytes" << std::endl;
+#endif
         setup->AddSendTask(m_vUniversalGateTable.GetArr(), m_nUNIVGates * m_nSecParamBytes * KEYS_PER_UNIV_GATE_IN_TABLE);
     }
 
 	if (m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT) > 0) {
-        std::cout << "[PerformSetup->CreateAndSendGarbCirc] (Bool_circ_CLIENT_output_bit > 0) AddSendTask sndbytes (ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8)): " << ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8) << " bytes" << std::endl;
-        setup->AddSendTask(m_vOutputShareSndBuf.GetArr(), ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8)); 
+#ifdef DEBUGYAOSERVER        
+		std::cout << "[PerformSetup->CreateAndSendGarbCirc] (Bool_circ_CLIENT_output_bit > 0) AddSendTask sndbytes (ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8)): " << ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8) << " bytes" << std::endl;
+#endif        
+		setup->AddSendTask(m_vOutputShareSndBuf.GetArr(), ceil_divide(m_cBoolCircuit->GetNumOutputBitsForParty(CLIENT), 8)); 
 	}
     std::cout << p_str;
 #ifdef DEBUGYAOSERVER
@@ -610,9 +618,11 @@ void YaoServerSharing::EvaluateANDGate(GATE* gate, ABYSetup* setup) {
 
 	if((m_nGarbledTableCtr - m_nGarbledTableSndCtr) >= GARBLED_TABLE_WINDOW) {
 		//setup->AddSendTask(m_vGarbledCircuit.GetArr(), m_nGarbledTableCtr * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE);
-        std::cout << "[PerformSetup->CreateAndSendGarbCirc->PrecomputeGC->EvalAND] (m_nGarbledTableCtr - m_nGarbledTableSndCtr): " << m_nGarbledTableCtr - m_nGarbledTableSndCtr << std::endl;
+#ifdef DEBUGYAOSERVER        
+		std::cout << "[PerformSetup->CreateAndSendGarbCirc->PrecomputeGC->EvalAND] (m_nGarbledTableCtr - m_nGarbledTableSndCtr): " << m_nGarbledTableCtr - m_nGarbledTableSndCtr << std::endl;
         std::cout << "[PerformSetup->CreateAndSendGarbCirc->PrecomputeGC->EvalAND] m_nSecParamBytes: " << m_nSecParamBytes << std::endl;
         std::cout << "[PerformSetup->CreateAndSendGarbCirc->PrecomputeGC->EvalAND] AddSendTask sending " << (m_nGarbledTableCtr - m_nGarbledTableSndCtr) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE << " bytes" << std::endl;
+#endif		
 		setup->AddSendTask(m_vGarbledCircuit.GetArr() + m_nGarbledTableSndCtr * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE,
 				(m_nGarbledTableCtr - m_nGarbledTableSndCtr) * m_nSecParamBytes * KEYS_PER_GATE_IN_TABLE);
 		m_nGarbledTableSndCtr = m_nGarbledTableCtr;
@@ -692,9 +702,10 @@ void YaoServerSharing::CreateGarbledTable(GATE* ggate, uint32_t pos, GATE* gleft
 	} else {
 		ggate->gs.yinput.pi[pos] = (outwire_key[m_nSecParamBytes-1] & 0x01) ^ ((lpbit) & (rpbit));
 	}
-
+#ifdef DEBUGYAOSERVER
     std::cout << "[YaoServerShar::CreateGarblTable] ..." << std::endl;
-#ifndef DEBUGYAOSERVER
+#endif
+#ifdef DEBUGYAOSERVER
 		std::cout << " encr : ";
 		PrintKey(lkey);
 		std::cout << " (" << (uint32_t) gleft->gs.yinput.pi[pos] << ") and : ";

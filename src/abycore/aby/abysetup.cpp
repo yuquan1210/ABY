@@ -140,8 +140,9 @@ BOOL ABYSetup::PrepareSetupPhase(comm_ctx* comm) {
 		clock_gettime(CLOCK_MONOTONIC, &end);
 		std::cout << "Throughput: " << 2 * (tmparraysize >> 20) * benchrounds / (getMillies(start, end) / 1000) << " MiB/s" << std::endl;
 		delete[] benchtmp;
-
+#ifdef DEBUGSETUP
         std::cout << "[ConnectAndBaseOT->ABYSetup::PrepareSetupPhase] estimate total sent at BENCH_HARDWARE: " << (1+9)*benchrounds + (tmparraysize+9)*benchrounds << " byte" << std::endl;
+#endif
 #endif
 
 		iknp_ot_sender = new IKNPOTExtSnd(m_cCrypt, m_tComm->rcv_std.get(), m_tComm->snd_std.get(),
@@ -175,7 +176,9 @@ BOOL ABYSetup::PrepareSetupPhase(comm_ctx* comm) {
 		clock_gettime(CLOCK_MONOTONIC, &end);
 		std::cout << "Throughput: " << 2 * (tmparraysize>>20)*benchrounds / (getMillies(start, end) / 1000) << " MiB/s" << std::endl;
 				delete benchtmp;
+#ifdef DEBUGSETUP
         std::cout << "[ConnectAndBaseOT->ABYSetup::PrepareSetupPhase] estimate total sent at BENCH_HARDWARE: " << (1+9)*benchrounds + (tmparraysize+9)*benchrounds << " byte" << std::endl;
+#endif
 #endif
 		iknp_ot_receiver = new IKNPOTExtRec(m_cCrypt, m_tComm->rcv_std.get(), m_tComm->snd_std.get(),
 				/* num_ot_blocks */ 1024, /* verify_ot */ false, /* use_fixed_aes_key_hashing */ true);
@@ -277,7 +280,7 @@ BOOL ABYSetup::ThreadRunIKNPSnd(uint32_t threadid) {
 		X[0] = (task->pval.sndval.X0);
 		X[1] = (task->pval.sndval.X1);
 
-#ifdef BATCH
+#ifdef DEBUGSETUP
 		std::cout << "[PerformSetupPhase->ABYSetup::ThreadIKNPSnd] Starting OT sender routine for " << numOTs << " OTs on " << task->bitlen << " bit strings " << std::endl;
         std::cout << "[PerformSetupPhase->ABYSetup::ThreadIKNPSnd] Number OT Threads (m_nNumOTThreads): " << m_nNumOTThreads << std::endl;
 #endif
@@ -311,7 +314,7 @@ BOOL ABYSetup::ThreadRunIKNPRcv(uint32_t threadid) {
 		IKNP_OTTask* task = m_vIKNPOTTasks[inverse][i];
 		uint32_t numOTs = task->numOTs;
 
-#ifdef BATCH
+#ifdef DEBUGSETUP
 		std::cout << "[PerformSetupPhase->ABYSetup::ThreadIKNPRcv] Starting OT receiver routine for " << numOTs << " OTs on " << task->bitlen << " bit strings " << std::endl;
         std::cout << "[PerformSetupPhase->ABYSetup::ThreadIKNPRcv] Number OT Threads (m_nNumOTThreads): " << m_nNumOTThreads << std::endl;
 #endif

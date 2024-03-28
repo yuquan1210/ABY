@@ -26,7 +26,7 @@
 #include "yaosharing.h"
 
 
-#define DEBUGYAOSERVER
+// #define DEBUGYAOSERVER
 /**
  Yao Server Sharing class.
  */
