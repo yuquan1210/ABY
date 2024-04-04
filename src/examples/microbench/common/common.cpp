@@ -103,25 +103,26 @@ int32_t test_circuit(e_role role, char* address, uint16_t port, seclvl seclvl,
 
 #if BENCHONLINEPHASE
 	std::cout << "Average Online time distribution: " << std::endl;
-	std::cout << "Bool: " << std::endl;
-    for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
-        std::cout << "\tlayer " << layer << ": local gate: " << tt_localop_timings[0][layer] / num_tests << ", interactive gate: " << tt_interop_timings[0][layer] / num_tests << ", layer finish: " << tt_finishlay_timings[0][layer] / num_tests << std::endl;
-    }
-    std::cout << "Yao Server: " << std::endl;
-    for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
-        std::cout << "\tlayer " << layer << ": local gate: " << tt_localop_timings[1][layer] / num_tests << ", interactive gate: " << tt_interop_timings[1][layer] / num_tests << ", layer finish: " << tt_finishlay_timings[1][layer] / num_tests << std::endl;
-    }
-	std::cout << "Yao Receiver: " << std::endl;
-    for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
-        std::cout << "\tlayer " << layer << ": local gate: " << tt_localop_timings[3][layer] / num_tests << ", interactive gate: " << tt_interop_timings[3][layer] / num_tests << ", layer finish: " << tt_finishlay_timings[3][layer] / num_tests << std::endl;
-    }
-    std::cout << "Arith: " << std::endl;
-    for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
-        std::cout << "\tlayer " << layer << ": local gate: " << tt_localop_timings[2][layer] / num_tests << ", interactive gate: " << tt_interop_timings[2][layer] / num_tests << ", layer finish: " << tt_finishlay_timings[2][layer] / num_tests << std::endl;
-    }
+	// std::cout << "Bool: " << std::endl;
+    // for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
+    //     std::cout << "\tlayer " << layer << ": local gate: " << tt_localop_timings[0][layer] / num_tests << ", interactive gate: " << tt_interop_timings[0][layer] / num_tests << ", layer finish: " << tt_finishlay_timings[0][layer] / num_tests << std::endl;
+    // }
+    // std::cout << "Yao Server: " << std::endl;
+    // for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
+    //     std::cout << "\tlayer " << layer << ": local gate: " << tt_localop_timings[1][layer] / num_tests << ", interactive gate: " << tt_interop_timings[1][layer] / num_tests << ", layer finish: " << tt_finishlay_timings[1][layer] / num_tests << std::endl;
+    // }
+	// std::cout << "Yao Receiver: " << std::endl;
+    // for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
+    //     std::cout << "\tlayer " << layer << ": local gate: " << tt_localop_timings[3][layer] / num_tests << ", interactive gate: " << tt_interop_timings[3][layer] / num_tests << ", layer finish: " << tt_finishlay_timings[3][layer] / num_tests << std::endl;
+    // }
+    // std::cout << "Arith: " << std::endl;
+    // for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
+    //     std::cout << "\tlayer " << layer << ": local gate: " << tt_localop_timings[2][layer] / num_tests << ", interactive gate: " << tt_interop_timings[2][layer] / num_tests << ", layer finish: " << tt_finishlay_timings[2][layer] / num_tests << std::endl;
+    // }
 	std::cout << "Communication: " << std::endl;
     for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
-        std::cout << "\tlayer " << layer << ": interaction: " << tt_interaction_timings[layer] / num_tests << std::endl;
+        // std::cout << "\tlayer " << layer << ": interaction: " << tt_interaction_timings[layer] / num_tests << std::endl;
+        std::cout << tt_interaction_timings[layer] << std::endl;
     }
     std::cout << std::endl;
 #endif

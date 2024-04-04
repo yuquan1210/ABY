@@ -117,6 +117,8 @@ BOOL ABYSetup::PrepareSetupPhase(comm_ctx* comm) {
 	timespec start, end;
 	uint32_t benchrounds = 16;
 	uint64_t tmparraysize = 1024*1024*4; // 4 MiB block
+	// uint64_t tmparraysize = 1024*1024*1; // 1 MiB block
+	// uint64_t tmparraysize = 1;
 	BYTE * benchtmp = new BYTE[tmparraysize];
 #endif
 
@@ -138,7 +140,10 @@ BOOL ABYSetup::PrepareSetupPhase(comm_ctx* comm) {
 		}
 
 		clock_gettime(CLOCK_MONOTONIC, &end);
-		std::cout << "Throughput: " << 2 * (tmparraysize >> 20) * benchrounds / (getMillies(start, end) / 1000) << " MiB/s" << std::endl;
+		std::cout << "Avg Throughput: " << 2 * (tmparraysize >> 20) * benchrounds / (getMillies(start, end) / 1000) << " MiB/s | "
+			<< 2 * tmparraysize * benchrounds / (getMillies(start, end) / 1000) << " Byte/s | "
+			<< 2 * tmparraysize * benchrounds / getMillies(start, end) << " Byte/ms" << std::endl;
+		std::cout << "Time spent: " << getMillies(start, end) << " ms" << std::endl;
 		delete[] benchtmp;
 #ifdef DEBUGSETUP
         std::cout << "[ConnectAndBaseOT->ABYSetup::PrepareSetupPhase] estimate total sent at BENCH_HARDWARE: " << (1+9)*benchrounds + (tmparraysize+9)*benchrounds << " byte" << std::endl;
@@ -174,7 +179,11 @@ BOOL ABYSetup::PrepareSetupPhase(comm_ctx* comm) {
 		}
 
 		clock_gettime(CLOCK_MONOTONIC, &end);
-		std::cout << "Throughput: " << 2 * (tmparraysize>>20)*benchrounds / (getMillies(start, end) / 1000) << " MiB/s" << std::endl;
+		// std::cout << "Throughput: " << 2 * (tmparraysize>>20)*benchrounds / (getMillies(start, end) / 1000) << " MiB/s" << std::endl;
+		std::cout << "Avg Throughput: " << 2 * (tmparraysize >> 20) * benchrounds / (getMillies(start, end) / 1000) << " MiB/s | "
+			<< 2 * tmparraysize * benchrounds / (getMillies(start, end) / 1000) << " Byte/s | "
+			<< 2 * tmparraysize * benchrounds / getMillies(start, end) << " Byte/ms" << std::endl;
+		std::cout << "Time spent: " << getMillies(start, end) << " ms" << std::endl;
 				delete benchtmp;
 #ifdef DEBUGSETUP
         std::cout << "[ConnectAndBaseOT->ABYSetup::PrepareSetupPhase] estimate total sent at BENCH_HARDWARE: " << (1+9)*benchrounds + (tmparraysize+9)*benchrounds << " byte" << std::endl;

@@ -16,7 +16,7 @@
  \brief		Implementation of the millionaire problem using ABY Framework.
  */
 
-#include "1add_1mul.h"
+#include "common.h"
 #include "../../../abycore/circuit/booleancircuits.h"
 #include "../../../abycore/sharing/sharing.h"
 
@@ -169,11 +169,16 @@ share* BuildMillionaireProbCircuit(share *s_alice, share *s_bob, Circuit *circ) 
 
 	share* add_out;
     share* mul_out;
+	share* and_out;
+	share* and2_out;
 
 	/** Calling the greater than equal function in the Boolean circuit class.*/
 	add_out = circ->PutADDGate(s_alice, s_bob);
 
     mul_out = circ->PutMULGate(add_out, s_bob);
 
-	return mul_out;
+	and_out = circ->PutANDGate(mul_out, s_bob);
+	and2_out = circ->PutANDGate(and_out, s_bob);
+
+	return and2_out;
 }

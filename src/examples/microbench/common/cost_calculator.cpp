@@ -414,7 +414,7 @@ void BoolCircuit::BoolCircLayer::printBoolCircLayerLocalOps(){
 }
 
 void BoolCircuit::BoolCircLayer::printBoolCircLayerInterOps(){
-    std::cout << "\tinterops: " << std::endl;
+    // std::cout << "\tinterops: " << std::endl;
     if(this->nbIn > 0){
         std::cout << "\t\t" << "num Bool IN: " << this->nbIn << std::endl;
     }
@@ -470,7 +470,7 @@ void ArithCircuit::ArithCircLayer::printArithCircLayerLocalOps(){
 }
 
 void ArithCircuit::ArithCircLayer::printArithCircLayerInterOps(){
-    std::cout << "\tinterops: " << std::endl;
+    // std::cout << "\tinterops: " << std::endl;
     if(this->naIn > 0) {
         std::cout << "\t\t" << "num Arith IN: " << naIn << std::endl;
     }
@@ -527,7 +527,7 @@ void YaoCircuit::YaoCircLayer::printYaoCircLayerLocalOps(){
 
 
 void YaoCircuit::YaoCircLayer::printYaoCircLayerInterOps(){
-    std::cout << "\tinterops: " << std::endl;
+    // std::cout << "\tinterops: " << std::endl;
     if(this->nyIn > 0){
         std::cout << "\t\t" << "num Yao IN: " << this->nyIn << std::endl;
     }

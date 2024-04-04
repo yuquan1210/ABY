@@ -482,10 +482,16 @@ BOOL ABYParty::ThreadSendValues(uint32_t id) {
 	}
 	//gettimeofday(&tstart, NULL);
     // y: get socket start count 
+	timespec start, end;
     uint64_t actual_snd_begin = this->m_vSockets[0]->getSndCnt();
 	if(snd_buf_size_total > 0) {
+		clock_gettime(CLOCK_MONOTONIC, &start);
 		//m_vSockets[2]->Send(snd_buf_total, snd_buf_size_total);
 		m_tPartyChan->blocking_send(m_vThreads[id]->GetEvent(), snd_buf_total, snd_buf_size_total);
+		clock_gettime(CLOCK_MONOTONIC, &end);
+		std::cout << "\nSEND \nData sent: " << snd_buf_size_total+9 << " bytes" << std::endl;
+		std::cout << "Time spent: " << getMillies(start, end) << " ms" << std::endl;
+		std::cout << "Throughput: " << (snd_buf_size_total+9) / getMillies(start, end) << " Byte/ms" << std::endl;
 	}
     // y: print actual sent vs. sent buf total here
     uint64_t actual_snd_end = this->m_vSockets[0]->getSndCnt();
@@ -520,9 +526,15 @@ BOOL ABYParty::ThreadReceiveValues() {
 	uint8_t* rcvbuftotal = (uint8_t*) malloc(rcvbytestotal);
 	assert(rcvbuftotal != NULL);
 	//gettimeofday(&tstart, NULL);
+	timespec start, end;
 	if (rcvbytestotal > 0) {
 		//m_vSockets[2]->Receive(rcvbuftotal, rcvbytestotal);
+		clock_gettime(CLOCK_MONOTONIC, &start);
 		m_tPartyChan->blocking_receive(rcvbuftotal, rcvbytestotal);
+		clock_gettime(CLOCK_MONOTONIC, &end);
+		std::cout << "\nRCV \nData to receive: " << rcvbytestotal+9 << " bytes" << std::endl;
+		std::cout << "Time spent: " << getMillies(start, end) << " ms" << std::endl;
+		std::cout << "Throughput: " << (rcvbytestotal+9) / getMillies(start, end) << " Byte/ms" << std::endl;
 	}
 
 	//gettimeofday(&tend, NULL);

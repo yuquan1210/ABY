@@ -151,7 +151,7 @@ class BoolCircuit
 
             this->boolCircLayers[i] = currBoolLayer;
             //print current layer gate details
-            this->boolCircLayers[i]->printBoolCircLayerLocalOps();
+            // this->boolCircLayers[i]->printBoolCircLayerLocalOps();
             this->boolCircLayers[i]->printBoolCircLayerInterOps();
 
             this->tt_bIn += currBoolLayer->nbIn;
@@ -320,7 +320,7 @@ class ArithCircuit
 
             this->arithCircLayers[i] = currArithLayer;
             //print current layer gate details
-            this->arithCircLayers[i]->printArithCircLayerLocalOps();
+            // this->arithCircLayers[i]->printArithCircLayerLocalOps();
             this->arithCircLayers[i]->printArithCircLayerInterOps();
 
             this->tt_aIn += currArithLayer->naIn;
@@ -489,7 +489,7 @@ class YaoCircuit
 
             this->yaoCircLayers[i] = currYaoLayer;
             //print current layer gate details
-            this->yaoCircLayers[i]->printYaoCircLayerLocalOps();
+            // this->yaoCircLayers[i]->printYaoCircLayerLocalOps();
             this->yaoCircLayers[i]->printYaoCircLayerInterOps();
 
             this->tt_yIn += currYaoLayer->nyIn;
