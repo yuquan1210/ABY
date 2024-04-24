@@ -1,6 +1,7 @@
 add_library(aby
     aby/abyparty.cpp
     aby/abysetup.cpp
+    ABY_utils/comm_track.cpp
     circuit/abycircuit.cpp
     circuit/arithmeticcircuits.cpp
     circuit/booleancircuits.cpp
