@@ -398,7 +398,7 @@ BOOL ABYParty::EvaluateCircuit() {
 		PerformInteraction();
 #if BENCHONLINEPHASE
 		clock_gettime(CLOCK_MONOTONIC, &tend);
-		SaveInteractionTiming(getMillies(tstart, tend));
+		// SaveInteractionTiming(getMillies(tstart, tend));
 		interaction += getMillies(tstart, tend);
 		currInteraction = getMillies(tstart, tend);
 #endif
@@ -484,15 +484,21 @@ BOOL ABYParty::ThreadSendValues(uint32_t id) {
     // y: get socket start count 
 	timespec start, end;
     uint64_t actual_snd_begin = this->m_vSockets[0]->getSndCnt();
+	double sent_time = 0;
+	uint8_t sent_data_size = 0;
 	if(snd_buf_size_total > 0) {
 		clock_gettime(CLOCK_MONOTONIC, &start);
 		//m_vSockets[2]->Send(snd_buf_total, snd_buf_size_total);
 		m_tPartyChan->blocking_send(m_vThreads[id]->GetEvent(), snd_buf_total, snd_buf_size_total);
 		clock_gettime(CLOCK_MONOTONIC, &end);
-		std::cout << "\nSEND \nData sent: " << snd_buf_size_total+9 << " bytes" << std::endl;
-		std::cout << "Time spent: " << getMillies(start, end) << " ms" << std::endl;
-		std::cout << "Throughput: " << (snd_buf_size_total+9) / getMillies(start, end) << " Byte/ms" << std::endl;
+		sent_time = getMillies(start, end);
+		sent_data_size = snd_buf_size_total+9;
 	}
+	std::cout << "\nSEND \nData sent: " << sent_data_size << " bytes" << std::endl;
+	std::cout << "Time spent: " << sent_time << " ms" << std::endl;
+	std::cout << "Throughput: " << sent_data_size / sent_time << " Byte/ms" << std::endl;
+	SaveInteractionTiming(m_nDepth, sent_time); //add m_nDepth
+	SaveInteractionDataSent(m_nDepth, sent_data_size);
     // y: print actual sent vs. sent buf total here
     uint64_t actual_snd_end = this->m_vSockets[0]->getSndCnt();
 #ifdef DEBUGCOMM
@@ -698,8 +704,12 @@ std::vector<std::vector<double>> ABYParty::GetFinishLayerTimings() {
 	return GetFinishLayerTimingsFromTimer();
 }
 
-std::vector<double> ABYParty::GetInteractionTimings() {
+std::map<uint32_t, double> ABYParty::GetInteractionTimings() {
 	return GetInteractionTimingsFromTimer();
+}
+
+std::map<uint32_t, uint8_t> ABYParty::GetInteractionDataSent() {
+	return GetInteractionDataSentFromTimer();
 }
 
 uint64_t ABYParty::GetSentData(ABYPHASE phase) {

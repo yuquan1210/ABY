@@ -122,13 +122,13 @@ int32_t test_millionaire_prob_circuit(e_role role, const std::string& address, u
 	std::vector<std::vector<double>> tt_localop_timings(5);
     std::vector<std::vector<double>> tt_interop_timings(5);
     std::vector<std::vector<double>> tt_finishlay_timings(5);
-    std::vector<double> tt_interaction_timings;
+    std::map<uint32_t, double> tt_interaction_timings;
     double tt_online_time = 0.0;
     double online_time;
 	std::vector<std::vector<double>> localop_timings = party->GetLocalOpTimings();
 	std::vector<std::vector<double>> interop_timings = party->GetInterOpTimings();
 	std::vector<std::vector<double>> finishlay_timings = party->GetFinishLayerTimings();
-	std::vector<double> interaction_timings = party->GetInteractionTimings();
+	std::map<uint32_t, double> interaction_timings = party->GetInteractionTimings();
 	for(int sharing = 0; sharing < 5; sharing++){
 		tt_localop_timings[sharing] = localop_timings[sharing];
 		tt_interop_timings[sharing] = interop_timings[sharing];

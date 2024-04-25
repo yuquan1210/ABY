@@ -40,7 +40,8 @@ int32_t test_circuit(e_role role, char* address, uint16_t port, seclvl seclvl,
     std::vector<std::vector<double>> tt_localop_timings(5);
     std::vector<std::vector<double>> tt_interop_timings(5);
     std::vector<std::vector<double>> tt_finishlay_timings(5);
-    std::vector<double> tt_interaction_timings(5);
+    std::map<uint32_t, double> tt_interaction_timings;
+    std::map<uint32_t, uint8_t> interaction_datasent;
 
     double tt_online_time = 0.0;
     double online_time;
@@ -75,7 +76,7 @@ int32_t test_circuit(e_role role, char* address, uint16_t port, seclvl seclvl,
         std::vector<std::vector<double>> localop_timings = party->GetLocalOpTimings();
         std::vector<std::vector<double>> interop_timings = party->GetInterOpTimings();
         std::vector<std::vector<double>> finishlay_timings = party->GetFinishLayerTimings();
-        std::vector<double> interaction_timings = party->GetInteractionTimings();
+        std::map<uint32_t, double> interaction_timings = party->GetInteractionTimings();
         if(i == 0){
             for(int sharing = 0; sharing < 5; sharing++){
                 tt_localop_timings[sharing] = localop_timings[sharing];
@@ -83,6 +84,7 @@ int32_t test_circuit(e_role role, char* address, uint16_t port, seclvl seclvl,
                 tt_finishlay_timings[sharing] = finishlay_timings[sharing];
             }
             tt_interaction_timings = interaction_timings;
+            interaction_datasent = party->GetInteractionDataSent();
         } else {
             for(int sharing = 0; sharing < 5; sharing++){
                 for(int layer = 0; layer < localop_timings[0].size(); layer++){
@@ -119,16 +121,21 @@ int32_t test_circuit(e_role role, char* address, uint16_t port, seclvl seclvl,
     // for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
     //     std::cout << "\tlayer " << layer << ": local gate: " << tt_localop_timings[2][layer] / num_tests << ", interactive gate: " << tt_interop_timings[2][layer] / num_tests << ", layer finish: " << tt_finishlay_timings[2][layer] / num_tests << std::endl;
     // }
-	std::cout << "Communication: " << std::endl;
+	std::cout << "Communication per layer per test: " << std::endl;
     for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
         // std::cout << "\tlayer " << layer << ": interaction: " << tt_interaction_timings[layer] / num_tests << std::endl;
-        std::cout << tt_interaction_timings[layer] << std::endl;
+        std::cout << static_cast<unsigned int>(interaction_datasent[layer]) << " bytes " << tt_interaction_timings[layer] / ((double)num_tests) << " ms" << std::endl;
     }
     std::cout << std::endl;
 #endif
 
     std::cout << "\ntt_online_time: " << tt_online_time << " ms" << std::endl;
     std::cout << "avg online time over " << num_tests << " reps: " << tt_online_time / ((double)num_tests) << std::endl;
+
+    //y: compute RTT & bw here
+
+    //y: manually update cost table (need to implement external cost table calculation program)
+    // takes (function, network characteristics) then give cost table for operations in function
 
     // y: verify output by recalculating with clear values, need modify after paral implement done 
     // for(int j = 0; j < alice_input.size(); j++) {

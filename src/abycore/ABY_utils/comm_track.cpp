@@ -23,12 +23,13 @@
 #include <vector>
 
 #include "comm_track.h"
-
+#include <map>
 
 std::vector<std::vector<double>> localop_timings(5, std::vector<double>());
 std::vector<std::vector<double>> interop_timings(5, std::vector<double>());
 std::vector<std::vector<double>> finishlay_timings(5, std::vector<double>());
-std::vector<double> interaction_timings;
+std::map<uint32_t, double> interaction_timings;
+std::map<uint32_t, uint8_t> interaction_datasent;
 
 void SaveLocalOpTiming(double timing, int sharing) {
 	localop_timings[sharing].push_back(timing);
@@ -42,8 +43,12 @@ void SaveFinishLayerTiming(double timing, int sharing) {
 	finishlay_timings[sharing].push_back(timing);
 }
 
-void SaveInteractionTiming(double timing) {
-	interaction_timings.push_back(timing);
+void SaveInteractionTiming(uint32_t layer, double timing) {
+	interaction_timings[layer] = timing;
+}
+
+void SaveInteractionDataSent(uint32_t layer, uint8_t datasize) {
+	interaction_datasent[layer] = datasize;
 }
 
 void clearTimings(){
@@ -53,4 +58,5 @@ void clearTimings(){
 		finishlay_timings[i].clear();
 	}
 	interaction_timings.clear();
+	interaction_datasent.clear();
 }

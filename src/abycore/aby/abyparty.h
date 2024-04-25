@@ -61,7 +61,8 @@ public:
 	std::vector<std::vector<double>> GetLocalOpTimings();
 	std::vector<std::vector<double>> GetInterOpTimings();
 	std::vector<std::vector<double>> GetFinishLayerTimings();
-	std::vector<double> GetInteractionTimings();
+	std::map<uint32_t, double> GetInteractionTimings();
+	std::map<uint32_t, uint8_t> GetInteractionDataSent();
 	uint64_t GetSentData(ABYPHASE phase);
 	uint64_t GetReceivedData(ABYPHASE phase);
 	uint32_t GetTotalGates();
