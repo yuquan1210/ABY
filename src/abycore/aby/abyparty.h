@@ -21,6 +21,7 @@
 
 #include "../ABY_utils/ABYconstants.h"
 #include "../ABY_utils/comm_track.h"
+#include "../ABY_utils/net_estimator.h"
 #include <ENCRYPTO_utils/timer.h>
 #include <memory>
 #include <vector>
@@ -61,8 +62,10 @@ public:
 	std::vector<std::vector<double>> GetLocalOpTimings();
 	std::vector<std::vector<double>> GetInterOpTimings();
 	std::vector<std::vector<double>> GetFinishLayerTimings();
-	std::map<uint32_t, double> GetInteractionTimings();
-	std::map<uint32_t, uint8_t> GetInteractionDataSent();
+	std::map<uint32_t, double> GetSendTimings();
+	std::map<uint32_t, uint64_t> GetSendDataSize();
+	std::map<uint32_t, double> GetRcvTimings();
+	std::map<uint32_t, uint64_t> GetRcvDataSize();
 	uint64_t GetSentData(ABYPHASE phase);
 	uint64_t GetReceivedData(ABYPHASE phase);
 	uint32_t GetTotalGates();

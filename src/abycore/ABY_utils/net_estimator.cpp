@@ -4,18 +4,22 @@
 #include <cstdlib>
 #include <vector>
 
-#include "comm_track.h"
+#include "net_estimator.h"
 #include <map>
 
-void estimate_parameters(std::map<uint32_t, double> timings, std::map<uint32_t, uint8_t> datasent, int num_layers, double& RTT, double& bw) {
+void estimate_network(std::map<uint32_t, double> send_timings, std::map<uint32_t, uint64_t> send_datasize, std::map<uint32_t, double> rcv_timings, std::map<uint32_t, uint64_t> rcv_datasize, int num_layers, double& RTT, double& bw) {
     double sum_x = 0, sum_y = 0, sum_xx = 0, sum_xy = 0;
     int n = num_layers;
 
+    double datasize_layer;
+    double timing_layer;
     for(int layer = 0; layer < num_layers; layer++){
-        sum_x += datasent[layer];
-        sum_y += timings[layer];
-        sum_xx += datasent[layer] * datasent[layer];
-        sum_xy += datasent[layer] * timings[layer];
+        datasize_layer = send_datasize[layer] +rcv_datasize[layer];
+        timing_layer = send_timings[layer] + rcv_timings[layer]; 
+        sum_x += datasize_layer;
+        sum_y += timing_layer;
+        sum_xx += datasize_layer * datasize_layer;
+        sum_xy += datasize_layer * timing_layer;
     }
 
     double slope = (n * sum_xy - sum_x * sum_y) / (n * sum_xx - sum_x * sum_x);

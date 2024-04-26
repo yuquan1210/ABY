@@ -263,7 +263,6 @@ void ABYParty::ExecCircuit() {
 		StopRecording("Time for online phase: ", P_ONLINE, m_vSockets);
 	}
 
-
 	StopRecording("Total Time: ", P_TOTAL, m_vSockets);
 
 #ifdef PRINT_OUTPUT
@@ -418,15 +417,15 @@ BOOL ABYParty::EvaluateCircuit() {
 			currFincirclayer[i] = getMillies(tstart, tend);
 #endif
 		}
-// #if BENCHONLINEPHASE
-// 		std::cout << "\nOnline time at layer " << depth << ": " << std::endl;
-// 		std::cout << "Bool: local gates: " << currLocalops[S_BOOL] << ", interactive gates: " << currInteractiveops[S_BOOL] << ", layer finish: " << currFincirclayer[S_BOOL] << std::endl;
-// 		std::cout << "Yao: local gates: " << currLocalops[S_YAO] << ", interactive gates: " << currInteractiveops[S_YAO] << ", layer finish: " << currFincirclayer[S_YAO] << std::endl;
-// 		std::cout << "Yao Rev: local gates: " << currLocalops[S_YAO_REV] << ", interactive gates: " << currInteractiveops[S_YAO_REV] << ", layer finish: " << currFincirclayer[S_YAO_REV] << std::endl;
-// 		std::cout << "Arith: local gates: " << currLocalops[S_ARITH] << ", interactive gates: " << currInteractiveops[S_ARITH] << ", layer finish: " << currFincirclayer[S_ARITH] << std::endl;
-// 		std::cout << "SPLUT: local gates: " << currLocalops[S_SPLUT] << ", interactive gates: " << currInteractiveops[S_SPLUT] << ", layer finish: " << currFincirclayer[S_SPLUT] << std::endl;
-// 		std::cout << "Communication: " << currInteraction << std::endl << std::endl;
-// #endif
+#if BENCHONLINEPHASE
+		std::cout << "\nOnline time at layer " << depth << ": " << std::endl;
+		std::cout << "Bool: local gates: " << currLocalops[S_BOOL] << ", interactive gates: " << currInteractiveops[S_BOOL] << ", layer finish: " << currFincirclayer[S_BOOL] << std::endl;
+		std::cout << "Yao: local gates: " << currLocalops[S_YAO] << ", interactive gates: " << currInteractiveops[S_YAO] << ", layer finish: " << currFincirclayer[S_YAO] << std::endl;
+		std::cout << "Yao Rev: local gates: " << currLocalops[S_YAO_REV] << ", interactive gates: " << currInteractiveops[S_YAO_REV] << ", layer finish: " << currFincirclayer[S_YAO_REV] << std::endl;
+		std::cout << "Arith: local gates: " << currLocalops[S_ARITH] << ", interactive gates: " << currInteractiveops[S_ARITH] << ", layer finish: " << currFincirclayer[S_ARITH] << std::endl;
+		std::cout << "SPLUT: local gates: " << currLocalops[S_SPLUT] << ", interactive gates: " << currInteractiveops[S_SPLUT] << ", layer finish: " << currFincirclayer[S_SPLUT] << std::endl;
+		std::cout << "Communication: " << currInteraction << std::endl << std::endl;
+#endif
 	}
 #ifdef DEBUGABYPARTY
 		std::cout << "[ABYParty::EvaluateCircuit] Done with online phase; synchronizing "<< std::endl;
@@ -434,15 +433,22 @@ BOOL ABYParty::EvaluateCircuit() {
 	m_tPartyChan->synchronize_end();
 	delete m_tPartyChan;
 
-// #if BENCHONLINEPHASE
-// 	std::cout << "Online time is distributed as follows: " << std::endl;
-// 	std::cout << "Bool: local gates: " << localops[S_BOOL] << ", interactive gates: " << interactiveops[S_BOOL] << ", layer finish: " << fincirclayer[S_BOOL] << std::endl;
-// 	std::cout << "Yao: local gates: " << localops[S_YAO] << ", interactive gates: " << interactiveops[S_YAO] << ", layer finish: " << fincirclayer[S_YAO] << std::endl;
-// 	std::cout << "Yao Rev: local gates: " << localops[S_YAO_REV] << ", interactive gates: " << interactiveops[S_YAO_REV] << ", layer finish: " << fincirclayer[S_YAO_REV] << std::endl;
-// 	std::cout << "Arith: local gates: " << localops[S_ARITH] << ", interactive gates: " << interactiveops[S_ARITH] << ", layer finish: " << fincirclayer[S_ARITH] << std::endl;
-// 	std::cout << "SPLUT: local gates: " << localops[S_SPLUT] << ", interactive gates: " << interactiveops[S_SPLUT] << ", layer finish: " << fincirclayer[S_SPLUT] << std::endl;
-// 	std::cout << "Communication: " << interaction << std::endl << std::endl;
-// #endif
+#if BENCHONLINEPHASE
+	std::cout << "Online time is distributed as follows: " << std::endl;
+	std::cout << "Bool: local gates: " << localops[S_BOOL] << ", interactive gates: " << interactiveops[S_BOOL] << ", layer finish: " << fincirclayer[S_BOOL] << std::endl;
+	std::cout << "Yao: local gates: " << localops[S_YAO] << ", interactive gates: " << interactiveops[S_YAO] << ", layer finish: " << fincirclayer[S_YAO] << std::endl;
+	std::cout << "Yao Rev: local gates: " << localops[S_YAO_REV] << ", interactive gates: " << interactiveops[S_YAO_REV] << ", layer finish: " << fincirclayer[S_YAO_REV] << std::endl;
+	std::cout << "Arith: local gates: " << localops[S_ARITH] << ", interactive gates: " << interactiveops[S_ARITH] << ", layer finish: " << fincirclayer[S_ARITH] << std::endl;
+	std::cout << "SPLUT: local gates: " << localops[S_SPLUT] << ", interactive gates: " << interactiveops[S_SPLUT] << ", layer finish: " << fincirclayer[S_SPLUT] << std::endl;
+	std::cout << "Communication: " << interaction << std::endl << std::endl;
+#endif
+
+	double RTT = 0;
+	double bw = 0;
+	estimate_network(GetSendTimingsFromTimer(), GetSendDataSizeFromTimer(), GetRcvTimingsFromTimer(), GetRcvDataSizeFromTimer(), maxdepth, RTT, bw);
+	std::cout << "\n***Estimating over " << maxdepth << " communications" << std::endl;
+	std::cout << "RTT: " << RTT << std::endl;
+	std::cout << "bw: " << bw << std::endl << std::endl;
 	return true;
 }
 
@@ -485,7 +491,7 @@ BOOL ABYParty::ThreadSendValues(uint32_t id) {
 	timespec start, end;
     uint64_t actual_snd_begin = this->m_vSockets[0]->getSndCnt();
 	double sent_time = 0;
-	uint8_t sent_data_size = 0;
+	uint64_t sent_data_size = 0;
 	if(snd_buf_size_total > 0) {
 		clock_gettime(CLOCK_MONOTONIC, &start);
 		//m_vSockets[2]->Send(snd_buf_total, snd_buf_size_total);
@@ -496,9 +502,9 @@ BOOL ABYParty::ThreadSendValues(uint32_t id) {
 	}
 	std::cout << "\nSEND \nData sent: " << sent_data_size << " bytes" << std::endl;
 	std::cout << "Time spent: " << sent_time << " ms" << std::endl;
-	std::cout << "Throughput: " << sent_data_size / sent_time << " Byte/ms" << std::endl;
-	SaveInteractionTiming(m_nDepth, sent_time); //add m_nDepth
-	SaveInteractionDataSent(m_nDepth, sent_data_size);
+	std::cout << "Throughput: " << sent_data_size / sent_time << " Byte/ms" << std::endl  << std::endl;
+	SaveSendTiming(m_nDepth, sent_time);
+	SaveSendDataSize(m_nDepth, sent_data_size);
     // y: print actual sent vs. sent buf total here
     uint64_t actual_snd_end = this->m_vSockets[0]->getSndCnt();
 #ifdef DEBUGCOMM
@@ -533,16 +539,21 @@ BOOL ABYParty::ThreadReceiveValues() {
 	assert(rcvbuftotal != NULL);
 	//gettimeofday(&tstart, NULL);
 	timespec start, end;
+	double rcv_time = 0;
+	uint64_t rcv_datasize = 0;
 	if (rcvbytestotal > 0) {
 		//m_vSockets[2]->Receive(rcvbuftotal, rcvbytestotal);
 		clock_gettime(CLOCK_MONOTONIC, &start);
 		m_tPartyChan->blocking_receive(rcvbuftotal, rcvbytestotal);
 		clock_gettime(CLOCK_MONOTONIC, &end);
-		std::cout << "\nRCV \nData to receive: " << rcvbytestotal+9 << " bytes" << std::endl;
-		std::cout << "Time spent: " << getMillies(start, end) << " ms" << std::endl;
-		std::cout << "Throughput: " << (rcvbytestotal+9) / getMillies(start, end) << " Byte/ms" << std::endl;
+		rcv_time = getMillies(start, end);
+		rcv_datasize = rcvbytestotal+9;
 	}
-
+	std::cout << "\nRCV \nData to receive: " << rcv_datasize << " bytes" << std::endl;
+	std::cout << "Time spent: " << rcv_time << " ms" << std::endl;
+	std::cout << "Throughput: " << rcv_datasize / rcv_time << " Byte/ms" << std::endl;
+	SaveRcvTiming(m_nDepth, rcv_time);
+	SaveRcvDataSize(m_nDepth, rcv_datasize);
 	//gettimeofday(&tend, NULL);
 	//std::cout << "(" << m_nDepth << ") Time taken for receiving " << rcvbytestotal << " bytes: " << getMillies(tstart, tend) << std::endl;
 
@@ -704,12 +715,20 @@ std::vector<std::vector<double>> ABYParty::GetFinishLayerTimings() {
 	return GetFinishLayerTimingsFromTimer();
 }
 
-std::map<uint32_t, double> ABYParty::GetInteractionTimings() {
-	return GetInteractionTimingsFromTimer();
+std::map<uint32_t, double> ABYParty::GetSendTimings() {
+	return GetSendTimingsFromTimer();
 }
 
-std::map<uint32_t, uint8_t> ABYParty::GetInteractionDataSent() {
-	return GetInteractionDataSentFromTimer();
+std::map<uint32_t, uint64_t> ABYParty::GetSendDataSize() {
+	return GetSendDataSizeFromTimer();
+}
+
+std::map<uint32_t, double> ABYParty::GetRcvTimings() {
+	return GetRcvTimingsFromTimer();
+}
+
+std::map<uint32_t, uint64_t> ABYParty::GetRcvDataSize() {
+	return GetRcvDataSizeFromTimer();
 }
 
 uint64_t ABYParty::GetSentData(ABYPHASE phase) {

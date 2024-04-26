@@ -28,8 +28,10 @@
 std::vector<std::vector<double>> localop_timings(5, std::vector<double>());
 std::vector<std::vector<double>> interop_timings(5, std::vector<double>());
 std::vector<std::vector<double>> finishlay_timings(5, std::vector<double>());
-std::map<uint32_t, double> interaction_timings;
-std::map<uint32_t, uint8_t> interaction_datasent;
+std::map<uint32_t, double> send_timings;
+std::map<uint32_t, uint64_t> send_datasize;
+std::map<uint32_t, double> rcv_timings;
+std::map<uint32_t, uint64_t> rcv_datasize;
 
 void SaveLocalOpTiming(double timing, int sharing) {
 	localop_timings[sharing].push_back(timing);
@@ -43,12 +45,20 @@ void SaveFinishLayerTiming(double timing, int sharing) {
 	finishlay_timings[sharing].push_back(timing);
 }
 
-void SaveInteractionTiming(uint32_t layer, double timing) {
-	interaction_timings[layer] = timing;
+void SaveSendTiming(uint32_t layer, double timing) {
+	send_timings[layer] = timing;
 }
 
-void SaveInteractionDataSent(uint32_t layer, uint8_t datasize) {
-	interaction_datasent[layer] = datasize;
+void SaveSendDataSize(uint32_t layer, uint64_t datasize) {
+	send_datasize[layer] = datasize;
+}
+
+void SaveRcvTiming(uint32_t layer, double timing) {
+	rcv_timings[layer] = timing;
+}
+
+void SaveRcvDataSize(uint32_t layer, uint64_t datasize) {
+	rcv_datasize[layer] = datasize;
 }
 
 void clearTimings(){
@@ -57,6 +67,8 @@ void clearTimings(){
 		interop_timings[i].clear();
 		finishlay_timings[i].clear();
 	}
-	interaction_timings.clear();
-	interaction_datasent.clear();
+	send_timings.clear();
+	send_datasize.clear();
+	rcv_timings.clear();
+	rcv_datasize.clear();
 }
