@@ -17,7 +17,6 @@
  */
 
 #include "abycircuit.h"
-
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>
@@ -140,6 +139,8 @@ uint32_t ABYCircuit::PutPrimitiveGate(e_gatetype type, uint32_t inleft, uint32_t
 	std::cout << "New primitive gate with id: " << currentGateId() << ", left in = " << inleft << ", right in = " << inright << ", nvals = " << gate->nvals <<
 	", depth = " << gate->depth << ", sharingsize = " << gate->sharebitlen << ", nrounds = " << gate->nrounds << std::endl;
 #endif
+	//y: todo save it into a csv
+	SaveGate(inleft, inright, currentGateId(), gate->depth);
 
 	return currentGateId();
 }
@@ -346,6 +347,8 @@ uint32_t ABYCircuit::PutOUTGate(uint32_t in, e_role dst, uint32_t rounds) {
 
 	gate->nrounds = rounds;
 
+	SaveGate(in, (uint32_t)0, currentGateId(), gate->depth);
+
 	return currentGateId();
 }
 
@@ -372,6 +375,8 @@ uint32_t ABYCircuit::PutINGate(e_sharing context, uint32_t nvals, uint32_t share
 
 	if (gate->nvals > m_nMaxVectorSize)
 		m_nMaxVectorSize = gate->nvals;
+	
+	SaveGate(nvals, (uint32_t)0, currentGateId(), gate->depth);
 
 	return currentGateId();
 }

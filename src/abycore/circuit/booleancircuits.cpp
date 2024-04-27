@@ -136,6 +136,8 @@ std::vector<uint32_t> BooleanCircuit::PutANDGate(std::vector<uint32_t> inleft, s
 }
 
 share* BooleanCircuit::PutANDGate(share* ina, share* inb) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("AND_B", hl_gate_id+1);
 	return new boolshare(PutANDGate(ina->get_wires(), inb->get_wires()), this);
 }
 
@@ -254,6 +256,8 @@ uint32_t BooleanCircuit::PutSIMDINGate(uint32_t ninvals, e_role src) {
 
 
 share* BooleanCircuit::PutDummyINGate(uint32_t bitlen) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("IN_B", hl_gate_id+1);
 	std::vector<uint32_t> wires(bitlen);
 	for(uint32_t i = 0; i < bitlen; i++) {
 		wires[i] = PutINGate((e_role) !m_eMyRole);
@@ -397,6 +401,8 @@ uint32_t BooleanCircuit::PutOUTGate(uint32_t parentid, e_role dst) {
 }
 
 share* BooleanCircuit::PutOUTGate(share* parent, e_role dst) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("OUT_B", hl_gate_id+1);
 	return new boolshare(PutOUTGate(parent->get_wires(), dst), this);
 }
 

@@ -654,6 +654,7 @@ private:
 	 * When inputting shares with bitlen>1 and nvals convert to regular SIMD in gates
 	 */
 	template<class T> share* InternalPutINGate(uint32_t nvals, T val, uint32_t bitlen, e_role role) {
+		//mark here?
 		share* shr = new boolshare(bitlen, this);
 		assert(nvals <= sizeof(T) * 8);
 		T mask = 0;

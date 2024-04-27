@@ -72,6 +72,7 @@ int32_t test_circuit(e_role role, char* address, uint16_t port, seclvl seclvl,
             s_out[j] = circ->PutOUTGate(s_out[j], ALL);
         }
         if(i==0){
+            GenerateCircGraph("temp.csv");
             CalculateAllCircuitCost(ac, bc, yc);
         }
         party->ExecCircuit();

@@ -3,6 +3,7 @@ add_library(aby
     aby/abysetup.cpp
     ABY_utils/comm_track.cpp
     ABY_utils/net_estimator.cpp
+    ABY_utils/circ_save.cpp
     circuit/abycircuit.cpp
     circuit/arithmeticcircuits.cpp
     circuit/booleancircuits.cpp
