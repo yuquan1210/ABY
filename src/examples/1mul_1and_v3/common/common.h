@@ -51,8 +51,7 @@ int32_t test_millionaire_prob_circuit(e_role role, const std::string& address, u
  \param		bc	 		boolean circuit object.
  \brief		This function is used to build and solve the millionaire's problem.
  */
-share* BuildMillionaireProbCircuit(share *s_alice, share *s_bob,
-		BooleanCircuit *bc);
+share* BuildMillionaireProbCircuit(share *s_alice, share *s_bob, Circuit *circ);
 
 
 #endif /* __MILLIONAIREPROB_H_ */

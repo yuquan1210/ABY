@@ -42,6 +42,8 @@ void ArithmeticCircuit::Cleanup() {
 }
 
 share* ArithmeticCircuit::PutMULGate(share* ina, share* inb) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("MUL_A", hl_gate_id+1);
 	share* shr = new arithshare(this);
 	shr->set_wire_id(0, PutMULGate(ina->get_wire_id(0), inb->get_wire_id(0)));
 	return shr;

@@ -3,15 +3,20 @@
 #include <fstream>
 #include <map>
 
-std::vector<Gate> circGates;
+std::vector<DetailGate> circGates;
+uint32_t maxDepth;
 std::string currHighLevelGateName;
 uint32_t currHighLevelGateId;
 
 std::string dir = "/home/ethan/MPC/ABY/circ_graph";
 
-void SaveGate(uint32_t inleft, uint32_t inright, uint32_t ll_gate_id, uint32_t depth){
-    Gate gate = {GetCurrHighLevelGateName(), GetCurrHighLevelGateId(), inleft, inright, ll_gate_id, depth};
+void SaveGate(uint32_t inleft, uint32_t inright, uint32_t ll_gate_id, uint32_t depth, uint32_t sharing_size){
+    DetailGate gate = {GetCurrHighLevelGateName(), GetCurrHighLevelGateId(), inleft, inright, ll_gate_id, depth, sharing_size};
     circGates.push_back(gate);
+}
+
+void SaveMaxDepth(uint32_t md){
+    maxDepth = md;
 }
 
 void UpdateCurrHighLevelGate(std::string hl_gate_nmae, uint32_t hl_gate_id){
@@ -28,15 +33,15 @@ uint32_t GetCurrHighLevelGateId(){
 }
 
 void WriteCircForGraph(std::string fname){
-    std::ofstream outputFile(dir + fname);
+    std::ofstream outputFile(dir + "/" + fname);
 
     if (outputFile.is_open()) { 
-        outputFile << "hl_gate_name,hl_gate_id,input1_id,input2_id,ll_gate_id,depth\n"; 
-        for(Gate g : circGates) {
-            outputFile << g.hl_gate_nmae << ',' << g.hl_gate_id << ',' << g.inleft << ',' << g.inright << ',' <<g.ll_gate_id << ',' << g.depth << std::endl; 
+        outputFile << "hl_gate_name,hl_gate_id,input1_id,input2_id,ll_gate_id,depth,sharingsize\n"; 
+        for(DetailGate g : circGates) {
+            outputFile << g.hl_gate_nmae << ',' << g.hl_gate_id << ',' << g.inleft << ',' << g.inright << ',' <<g.ll_gate_id << ',' << g.depth << ',' << g.sharing_size << std::endl; 
         }
         outputFile.close(); 
-        std::cout << "Data was written to " << dir+fname << std::endl;
+        std::cout << "Data was written to " << dir + "/" + fname << std::endl;
     }
     else {
         std::cerr << "Error opening file\n";
@@ -51,7 +56,7 @@ void GenerateCircGraph(std::string fname){
     // Define the path to the Python script and the input for the script
     std::string pythonCommand = "python3";
     std::string scriptPath = "/home/ethan/MPC/ABY/circ_graph/circ_graph.py";
-    std::string input = dir + fname;
+    std::string input = dir + "/" + fname;
 
     // Construct the command to run the Python script with an argument
     std::string command = pythonCommand + " " + scriptPath + " " + input;
@@ -67,29 +72,43 @@ void GenerateCircGraph(std::string fname){
 }
 
 void GenerateCircSpreadSheet(std::string fname){
-    std::ofstream outputFile(dir + fname);
-    std::map<std::string, std::map<uint32_t, uint32_t>> gateMapHLIdToLayer;
-    std::map<std::string, std::string> gateMapHLIdToHLName;
+    std::ofstream outputFile(dir + "/" + fname);
+    std::map<uint32_t, std::map<uint32_t, uint32_t>> gateMapHLIdToLayerMap;
+    std::map<uint32_t, std::string> gateMapHLIdToHLName;
     
-    std::vector<uint32_t, uint32_t> layerMap;
-    for(Gate g : circGates) {
-        //add to corresponding hl_gate_id
-        if(gateMapHLIdToLayer.count(g.hl_gate_id) == 0){
-            layerMap = gateMap[g.hl_gate_id];
-            // layerVec.
-        }
+    std::map<uint32_t, uint32_t> layerMap;
+    for(DetailGate g : circGates) {
         gateMapHLIdToHLName[g.hl_gate_id] = g.hl_gate_nmae;
-
-
-
-        //increment its ll_gate_num at specific depth
-        outputFile << g.hl_gate_nmae << ',' << g.hl_gate_id << ',' << g.inleft << ',' << g.inright << ',' <<g.ll_gate_id << ',' << g.depth << std::endl; 
+        gateMapHLIdToLayerMap[g.hl_gate_id][g.depth] += g.sharing_size;
     }
 
     if (outputFile.is_open()) { 
+        outputFile << "Layer,";
+        for (auto it = gateMapHLIdToHLName.begin(); it != gateMapHLIdToHLName.end(); ++it) {
+            outputFile << it->second;
+            auto nextIt = it;
+            ++nextIt;
+            if (nextIt != gateMapHLIdToHLName.end()) {
+                outputFile << ",";
+            }
+        }
         outputFile << "\n"; 
-        for(Gate g : circGates) {
-            outputFile << g.hl_gate_nmae << ',' << g.hl_gate_id << ',' << g.inleft << ',' << g.inright << ',' <<g.ll_gate_id << ',' << g.depth << std::endl; 
+        for (uint32_t layer = 0; layer < maxDepth; layer++){
+            outputFile << "L" << layer << ",";
+            for (auto it = gateMapHLIdToLayerMap.begin(); it != gateMapHLIdToLayerMap.end(); ++it) {
+                layerMap = it->second;
+                if(layerMap.find(layer) != layerMap.end()){
+                    outputFile << layerMap[layer];
+                } else {
+                    outputFile << "0";
+                }
+                auto nextIt = it;
+                ++nextIt;
+                if (nextIt != gateMapHLIdToLayerMap.end()) {
+                    outputFile << ",";
+                }
+            }
+            outputFile << "\n"; 
         }
         outputFile.close(); 
         std::cout << "Data was written to " << dir+fname << std::endl;

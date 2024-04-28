@@ -22,7 +22,7 @@
 //ABY Party class
 #include "../../abycore/aby/abyparty.h"
 
-#include "common/1add_1mul.h"
+#include "common/common.h"
 
 int32_t read_test_options(int32_t* argcp, char*** argvp, e_role* role,
 		uint32_t* bitlen, uint32_t* nvals, uint32_t* secparam, std::string* address,

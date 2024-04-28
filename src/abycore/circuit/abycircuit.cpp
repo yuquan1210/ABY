@@ -140,7 +140,7 @@ uint32_t ABYCircuit::PutPrimitiveGate(e_gatetype type, uint32_t inleft, uint32_t
 	", depth = " << gate->depth << ", sharingsize = " << gate->sharebitlen << ", nrounds = " << gate->nrounds << std::endl;
 #endif
 	//y: todo save it into a csv
-	SaveGate(inleft, inright, currentGateId(), gate->depth);
+	SaveGate(inleft, inright, currentGateId(), gate->depth, gate->sharebitlen);
 
 	return currentGateId();
 }
@@ -347,7 +347,7 @@ uint32_t ABYCircuit::PutOUTGate(uint32_t in, e_role dst, uint32_t rounds) {
 
 	gate->nrounds = rounds;
 
-	SaveGate(in, (uint32_t)0, currentGateId(), gate->depth);
+	SaveGate(in, (uint32_t)0, currentGateId(), gate->depth, gate->sharebitlen);
 
 	return currentGateId();
 }
@@ -376,7 +376,7 @@ uint32_t ABYCircuit::PutINGate(e_sharing context, uint32_t nvals, uint32_t share
 	if (gate->nvals > m_nMaxVectorSize)
 		m_nMaxVectorSize = gate->nvals;
 	
-	SaveGate(nvals, (uint32_t)0, currentGateId(), gate->depth);
+	SaveGate(nvals, (uint32_t)0, currentGateId(), gate->depth, gate->sharebitlen);
 
 	return currentGateId();
 }

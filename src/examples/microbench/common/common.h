@@ -7,7 +7,6 @@
 #include <math.h>
 #include <cassert>
 #include "cost_calculator.h"
-// #include <abycore/ABY_utils/circ_save.h>
 
 share* PutTheGateForBenchmark(share* a, share* b, Circuit* circ, 
 	uint32_t bitlen=32);

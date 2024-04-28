@@ -906,6 +906,8 @@ share* BooleanCircuit::PutADDGate(share* ina, share* inb) {
 	//also output the carry of the result as long as the additional carry does not exceed the maximum bit length of the higher of both inputs
     std::cout << "a bitlength: " << ina->get_bitlength() << "; maxbitlength: " << ina->get_max_bitlength() << std::endl;
     std::cout << "b bitlength: " << inb->get_bitlength() << "; maxbitlength: " << inb->get_max_bitlength() << std::endl;
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("ADD_B", hl_gate_id+1);
 	bool carry = std::max(ina->get_bitlength(), inb->get_bitlength()) < std::max(ina->get_max_bitlength(), inb->get_max_bitlength());
 	return new boolshare(PutAddGate(ina->get_wires(), inb->get_wires(), carry), this);
 }
@@ -1393,6 +1395,8 @@ std::vector<uint32_t> BooleanCircuit::PutMulGate(std::vector<uint32_t> a, std::v
 
 share* BooleanCircuit::PutMULGate(share* ina, share* inb) {
 	//set the resulting bit length to be the smallest of: 1) bit length of the products or 2) the highest maximum bit length between ina and inb
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("MUL_B", hl_gate_id+1);
 	uint32_t resultbitlen = std::min(ina->get_bitlength() + inb->get_bitlength(), std::max(ina->get_max_bitlength(), inb->get_max_bitlength()));
 	return new boolshare(PutMulGate(ina->get_wires(), inb->get_wires(), resultbitlen), this);
 }
