@@ -1,0 +1,3 @@
+
+add_executable(1mul_y2b_1and common_main.cpp common/1mul_y2b_1and.cpp ../microbench/common/cost_calculator.cpp)
+target_link_libraries(1mul_y2b_1and ABY::aby ENCRYPTO_utils::encrypto_utils)

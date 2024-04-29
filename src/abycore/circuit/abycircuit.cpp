@@ -139,8 +139,6 @@ uint32_t ABYCircuit::PutPrimitiveGate(e_gatetype type, uint32_t inleft, uint32_t
 	std::cout << "New primitive gate with id: " << currentGateId() << ", left in = " << inleft << ", right in = " << inright << ", nvals = " << gate->nvals <<
 	", depth = " << gate->depth << ", sharingsize = " << gate->sharebitlen << ", nrounds = " << gate->nrounds << std::endl;
 #endif
-	//y: todo save it into a csv
-	SaveGate(inleft, inright, currentGateId(), gate->depth, gate->sharebitlen);
 
 	return currentGateId();
 }

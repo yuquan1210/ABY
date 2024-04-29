@@ -182,6 +182,8 @@ uint32_t ArithmeticCircuit::PutSharedSIMDINGate(uint32_t ninvals) {
 
 
 share* ArithmeticCircuit::PutDummyINGate([[maybe_unused]] uint32_t bitlen) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("IN_A", hl_gate_id+1);
 	std::vector<uint32_t> wires(1);
 	wires[0] = PutINGate((e_role) !m_eMyRole);
 	return new arithshare(wires, this);
@@ -222,6 +224,8 @@ uint32_t ArithmeticCircuit::PutOUTGate(uint32_t parentid, e_role dst) {
 }
 
 share* ArithmeticCircuit::PutOUTGate(share* parent, e_role dst) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("OUT_A", hl_gate_id+1);
 	share* shr = new arithshare(parent->get_bitlength(), this);
 	for (uint32_t i = 0; i < parent->get_bitlength(); i++) {
 		shr->set_wire_id(i, PutOUTGate(parent->get_wire_id(i), dst));
@@ -253,6 +257,7 @@ uint32_t ArithmeticCircuit::PutINVGate(uint32_t parentid) {
 uint32_t ArithmeticCircuit::PutCONVGate(std::vector<uint32_t> parentids) {
 	uint32_t gateid = m_cCircuit->PutCONVGate(parentids, 2, S_ARITH, m_nShareBitLen);
 	UpdateInteractiveQueue(gateid);
+	SaveGate(parentids[0], (uint32_t)0, gateid, m_vGates[gateid].depth, m_nShareBitLen); //UNSURE
 	m_nCONVGates += m_vGates[gateid].nvals * parentids.size();
 	return gateid;
 }
@@ -371,6 +376,8 @@ uint32_t ArithmeticCircuit::PutB2AGate(std::vector<uint32_t> ina) {
 
 share* ArithmeticCircuit::PutB2AGate(share* ina) {
 	share* shr = new arithshare(this);
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("B2A", hl_gate_id+1);
 	shr->set_wire_id(0, PutCONVGate(ina->get_wires()));
 	return shr;
 }

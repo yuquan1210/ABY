@@ -102,6 +102,7 @@ uint32_t BooleanCircuit::PutANDGate(uint32_t inleft, uint32_t inright) {
 		gateid = m_cCircuit->PutPrimitiveGate(G_NON_LIN, inleft, inright, m_nRoundsAND);
 
 		if (m_eContext == S_BOOL) {
+			SaveGate(inleft, inright, gateid, m_vGates[gateid].depth, m_vGates[gateid].sharebitlen);
 			UpdateInteractiveQueue(gateid);
 		} else if (m_eContext == S_YAO || m_eContext == S_YAO_REV) {
 			//if context == YAO, no communication round is required
@@ -524,9 +525,9 @@ uint32_t BooleanCircuit::PutY2BCONVGate(uint32_t parentid) {
 
 uint32_t BooleanCircuit::PutB2YCONVGate(uint32_t parentid) {
 	std::vector<uint32_t> in(1, parentid);
-	uint32_t gateid = m_cCircuit->PutCONVGate(in, 2, S_YAO, m_nShareBitLen);
+	uint32_t gateid = m_cCircuit->PutCONVGate(in, 2, S_YAO, m_nShareBitLen);	
 	UpdateInteractiveQueue(gateid);
-
+	SaveGate(parentid, (uint32_t)0, gateid, m_vGates[gateid].depth, m_nShareBitLen); //UNSURE
 	//treat similar to input gate of client and server
 	m_nB2YGates += m_vGates[gateid].nvals;
 
@@ -574,10 +575,14 @@ std::vector<uint32_t> BooleanCircuit::PutB2YCONVGate(std::vector<uint32_t> paren
 }
 
 share* BooleanCircuit::PutY2BGate(share* ina) {
+	// uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	// UpdateCurrHighLevelGate("Y2B", hl_gate_id+1);
 	return new boolshare(PutY2BCONVGate(ina->get_wires()), this);
 }
 
 share* BooleanCircuit::PutB2YGate(share* ina) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("B2Y", hl_gate_id+1);
 	return new boolshare(PutB2YCONVGate(ina->get_wires()), this);
 }
 
@@ -594,11 +599,13 @@ std::vector<uint32_t> BooleanCircuit::PutA2YCONVGate(std::vector<uint32_t> paren
 		m_vGates[srvshares[i]].gs.pos = 2 * i;
 		m_vGates[srvshares[i]].depth++; //increase depth by 1 since yao is evaluated before arith
 		UpdateInteractiveQueue(srvshares[i]);
+		SaveGate(parentid[0], (uint32_t)0, srvshares[i], m_vGates[srvshares[i]].depth, m_nShareBitLen); //UNSURE parentid[0], need to check conversion communication cost
 
 		clishares[i] = m_cCircuit->PutCONVGate(parentid, 2, S_YAO, m_nShareBitLen);
 		m_vGates[clishares[i]].gs.pos = 2 * i + 1;
 		m_vGates[clishares[i]].depth++; //increase depth by 1 since yao is evaluated before arith
 		UpdateInteractiveQueue(clishares[i]);
+		SaveGate(parentid[0], (uint32_t)0, clishares[i], m_vGates[clishares[i]].depth, m_nShareBitLen); //UNSURE
 	}
 
 	m_nA2YGates += m_vGates[parentid[0]].nvals * m_vGates[parentid[0]].sharebitlen;
@@ -608,6 +615,8 @@ std::vector<uint32_t> BooleanCircuit::PutA2YCONVGate(std::vector<uint32_t> paren
 }
 
 share* BooleanCircuit::PutA2YGate(share* ina) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("A2Y", hl_gate_id+1);
 	return new boolshare(PutA2YCONVGate(ina->get_wires()), this);
 }
 
@@ -906,14 +915,14 @@ share* BooleanCircuit::PutADDGate(share* ina, share* inb) {
 	//also output the carry of the result as long as the additional carry does not exceed the maximum bit length of the higher of both inputs
     std::cout << "a bitlength: " << ina->get_bitlength() << "; maxbitlength: " << ina->get_max_bitlength() << std::endl;
     std::cout << "b bitlength: " << inb->get_bitlength() << "; maxbitlength: " << inb->get_max_bitlength() << std::endl;
-	uint32_t hl_gate_id = GetCurrHighLevelGateId();
-	UpdateCurrHighLevelGate("ADD_B", hl_gate_id+1);
 	bool carry = std::max(ina->get_bitlength(), inb->get_bitlength()) < std::max(ina->get_max_bitlength(), inb->get_max_bitlength());
 	return new boolshare(PutAddGate(ina->get_wires(), inb->get_wires(), carry), this);
 }
 
 
 std::vector<uint32_t> BooleanCircuit::PutAddGate(std::vector<uint32_t> left, std::vector<uint32_t> right, BOOL bCarry) {
+	// uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	// UpdateCurrHighLevelGate("ADD_B", hl_gate_id+1);
 	PadWithLeadingZeros(left, right);
 	if (m_eContext == S_BOOL) {
 		return PutDepthOptimizedAddGate(left, right, bCarry);

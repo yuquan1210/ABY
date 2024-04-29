@@ -41,16 +41,14 @@ int32_t test_millionaire_prob_circuit(e_role role, const std::string& address, u
 	bob_money = rand();
 
 	if(role == SERVER) {
-		s_alice_money = circ->PutDummyINGate(bitlen);
-		s_bob_money = circ->PutINGate(bob_money, bitlen, SERVER);
+		s_alice_money = ac->PutDummyINGate(bitlen);
+		s_bob_money = ac->PutINGate(bob_money, bitlen, SERVER);
 	} else { //role == CLIENT
-		s_alice_money = circ->PutINGate(alice_money, bitlen, CLIENT);
-		s_bob_money = circ->PutDummyINGate(bitlen);
+		s_alice_money = ac->PutINGate(alice_money, bitlen, CLIENT);
+		s_bob_money = ac->PutDummyINGate(bitlen);
 	}
 
-	s_out = BuildMillionaireProbCircuit(s_alice_money, s_bob_money, circ);
-
-	s_out = circ->PutOUTGate(s_out, ALL);
+	s_out = BuildMillionaireProbCircuit(s_alice_money, s_bob_money, ac, bc, yc);
 
 	SaveMaxDepth(party->GetTotalDepth());
 	GenerateCircSpreadSheet("ss.csv");
@@ -113,13 +111,15 @@ int32_t test_millionaire_prob_circuit(e_role role, const std::string& address, u
 	return 0;
 }
 
-share* BuildMillionaireProbCircuit(share *s_alice, share *s_bob, Circuit *circ) {
-    share* mul_out;
-	share* and_out;
+share* BuildMillionaireProbCircuit(share *s_alice, share *s_bob, Circuit *ac, Circuit *bc, Circuit *yc) {
+    share* mul_out_a;
+	share* mul_out_y;
+	share* and_out_y;
 
 	/** Calling the greater than equal function in the Boolean circuit class.*/
-    mul_out = circ->PutMULGate(s_alice, s_bob);
-	and_out = circ->PutANDGate(s_alice, s_bob);
+    mul_out_a = ac->PutMULGate(s_alice, s_bob);
+	mul_out_y = bc->PutA2YGate(mul_out_a);
+	and_out_y = bc->PutANDGate(mul_out_y, mul_out_y);
 
-	return and_out;
+	return bc->PutOUTGate(and_out_y, ALL);
 }

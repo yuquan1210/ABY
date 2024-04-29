@@ -126,6 +126,8 @@ share* Circuit::PutY2AGate(share* ina, Circuit* boolsharingcircuit) {
 
 /* Converts an Arithmetic share to a Bool share. The yaosharing circuit needs to be from type S_YAO or S_YAO_REV! */
 share* Circuit::PutA2BGate(share* ina, Circuit* yaosharingcircuit) {
+	// uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	// UpdateCurrHighLevelGate("A2B", hl_gate_id+1);
 	assert(yaosharingcircuit->GetContext() == S_YAO || yaosharingcircuit->GetContext() == S_YAO_REV);
 	return PutY2BGate(yaosharingcircuit->PutA2YGate(ina));
 }
