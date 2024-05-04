@@ -1,5 +1,7 @@
 {
     "MUL": {
+        "num_protocols": 3,
+        "protocols": ["A", "B", "Y"],
         "A": {
             "min_rounds": 1,
             "max_rounds": 1,
@@ -23,6 +25,8 @@
         }
     }, 
     "AND": {
+        "num_protocols": 2,
+        "protocols": ["B", "Y"],
         "B": {
             "min_rounds": 1,
             "max_rounds": 32,
@@ -39,6 +43,8 @@
         }
     },
     "ADD": {
+        "num_protocols": 3,
+        "protocols": ["A", "B", "Y"],
         "A": {
             "min_rounds": 0,
             "max_rounds": 0,
@@ -62,6 +68,8 @@
         }
     },
     "SUB": {
+        "num_protocols": 3,
+        "protocols": ["A", "B", "Y"],
         "A": {
             "min_rounds": 0,
             "max_rounds": 0,
@@ -85,6 +93,8 @@
         }
     },
     "GT": {
+        "num_protocols": 2,
+        "protocols": ["B", "Y"],
         "B": {
             "min_rounds": 6,
             "max_rounds": 39,
@@ -101,6 +111,8 @@
         }
     },
     "MUX": {
+        "num_protocols": 2,
+        "protocols": ["B", "Y"],
         "B": {
             "min_rounds": 1,
             "max_rounds": 1,
@@ -117,19 +129,21 @@
         }
     },
     "IN": {
+        "num_protocols": 3,
+        "protocols": ["A", "B", "Y"],
         "A": {
-            "min_rounds": 0,
-            "max_rounds": 0,
-            "total_bits": 0, 
-            "least_spreadout": [],
-            "most_spreadout": []
+            "min_rounds": 1,
+            "max_rounds": 1,
+            "total_bits": 32, 
+            "least_spreadout": [32],
+            "most_spreadout": [32]
         },
         "B": {
-            "min_rounds": 0,
-            "max_rounds": 0,
-            "total_bits": 0, 
-            "least_spreadout": [],
-            "most_spreadout": []
+            "min_rounds": 1,
+            "max_rounds": 1,
+            "total_bits": 1, 
+            "least_spreadout": [32],
+            "most_spreadout": [32]
         },
         "Y": {
             "min_rounds": 1,
@@ -140,19 +154,21 @@
         }
     },
     "OUT": {
+        "num_protocols": 3,
+        "protocols": ["A", "B", "Y"],
         "A": {
-            "min_rounds": 0,
-            "max_rounds": 0,
-            "total_bits": 0, 
-            "least_spreadout": [],
-            "most_spreadout": []
+            "min_rounds": 1,
+            "max_rounds": 1,
+            "total_bits": 1, 
+            "least_spreadout": [32],
+            "most_spreadout": [32]
         },
         "B": {
-            "min_rounds": 0,
-            "max_rounds": 0,
-            "total_bits": 0, 
-            "least_spreadout": [],
-            "most_spreadout": []
+            "min_rounds": 1,
+            "max_rounds": 1,
+            "total_bits": 1, 
+            "least_spreadout": [32],
+            "most_spreadout": [32]
         },
         "Y": {
             "min_rounds": 2,
@@ -163,24 +179,36 @@
         }
     },
     "Y2B": {
-        "min_rounds": 0,
-        "max_rounds": 0,
-        "total_bits": 0, 
-        "least_spreadout": [0],
-        "most_spreadout": [0]
+        "num_protocols": 1,
+        "protocols": ["Conv"],
+        "Conv": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [0],
+            "most_spreadout": [0]
+        }
     },
     "B2Y": {
-        "min_rounds": 1,
-        "max_rounds": 32,
-        "total_bits": 32, 
-        "least_spreadout": [32],
-        "most_spreadout": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        "num_protocols": 1,
+        "protocols": ["Conv"],
+        "Conv": {
+            "min_rounds": 1,
+            "max_rounds": 32,
+            "total_bits": 32, 
+            "least_spreadout": [32],
+            "most_spreadout": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        }
     },
     "A2Y": {
-        "min_rounds": 1,
-        "max_rounds": 1,
-        "total_bits": 64, 
-        "least_spreadout": [64],
-        "most_spreadout": [64]
+        "num_protocols": 1,
+        "protocols": ["Conv"],
+        "Conv": {
+            "min_rounds": 1,
+            "max_rounds": 1,
+            "total_bits": 64, 
+            "least_spreadout": [64],
+            "most_spreadout": [64]
+        }
     }
 }
