@@ -1,0 +1,186 @@
+{
+    "MUL": {
+        "A": {
+            "min_rounds": 1,
+            "max_rounds": 1,
+            "total_bits": 32,  
+            "least_spreadout": [32],  
+            "most_spreadout": [32]
+        },
+        "B": {
+            "min_rounds": 33,
+            "max_rounds": 33,
+            "total_bits": 1489, 
+            "least_spreadout": [26, 554, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 5, 5],
+            "most_spreadout": [26, 58, 62, 61, 88, 133, 187, 151, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 31, 5, 5]
+        }, 
+        "Y": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [0],
+            "most_spreadout": [0]
+        }
+    }, 
+    "AND": {
+        "B": {
+            "min_rounds": 1,
+            "max_rounds": 32,
+            "total_bits": 32, 
+            "least_spreadout": [32],
+            "most_spreadout": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        }, 
+        "Y": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [0],
+            "most_spreadout": [0]
+        }
+    },
+    "ADD": {
+        "A": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [0],
+            "most_spreadout": [0]
+        },
+        "B": {
+            "min_rounds": 6,
+            "max_rounds": 36,
+            "total_bits": 192, 
+            "least_spreadout": [48, 32, 32, 32, 32, 16],
+            "most_spreadout": [1, 3, 3, 3, 3, 5, 5, 5, 3, 5, 7, 5, 3, 7, 7, 7, 5, 5, 5, 9, 3, 7, 7, 7, 5, 5, 9, 9, 5, 7, 9, 9, 6, 4, 2, 2]
+        },
+        "Y": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [0],
+            "most_spreadout": [0]
+        }
+    },
+    "SUB": {
+        "A": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [0],
+            "most_spreadout": [0]
+        },
+        "B": {
+            "min_rounds": 34,
+            "max_rounds": 34,
+            "total_bits": 31, 
+            "least_spreadout": [1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            "most_spreadout": [1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        },
+        "Y": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [0],
+            "most_spreadout": [0]
+        }
+    },
+    "GT": {
+        "B": {
+            "min_rounds": 6,
+            "max_rounds": 39,
+            "total_bits": 89, 
+            "least_spreadout": [47, 23, 11, 5, 2, 1],
+            "most_spreadout": [1, 2, 1, 3, 1, 1, 3, 1, 3, 2, 2, 3, 1, 3, 3, 3, 1, 3, 2, 3, 4, 1, 3, 3, 3, 1, 3, 3, 5, 1, 3, 3, 3, 1, 3, 2, 2, 2, 1]
+        },
+        "Y": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [0],
+            "most_spreadout": [0]
+        }
+    },
+    "MUX": {
+        "B": {
+            "min_rounds": 1,
+            "max_rounds": 1,
+            "total_bits": 33, 
+            "least_spreadout": [33],
+            "most_spreadout": [33]
+        },
+        "Y": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [0],
+            "most_spreadout": [0]
+        }
+    },
+    "IN": {
+        "A": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [],
+            "most_spreadout": []
+        },
+        "B": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [],
+            "most_spreadout": []
+        },
+        "Y": {
+            "min_rounds": 1,
+            "max_rounds": 1,
+            "total_bits": 512, 
+            "least_spreadout": [512],
+            "most_spreadout": [512]
+        }
+    },
+    "OUT": {
+        "A": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [],
+            "most_spreadout": []
+        },
+        "B": {
+            "min_rounds": 0,
+            "max_rounds": 0,
+            "total_bits": 0, 
+            "least_spreadout": [],
+            "most_spreadout": []
+        },
+        "Y": {
+            "min_rounds": 2,
+            "max_rounds": 2,
+            "total_bits": 1024, 
+            "least_spreadout": [0, 1024],
+            "most_spreadout": [0, 1024]
+        }
+    },
+    "Y2B": {
+        "min_rounds": 0,
+        "max_rounds": 0,
+        "total_bits": 0, 
+        "least_spreadout": [0],
+        "most_spreadout": [0]
+    },
+    "B2Y": {
+        "min_rounds": 1,
+        "max_rounds": 32,
+        "total_bits": 32, 
+        "least_spreadout": [32],
+        "most_spreadout": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    },
+    "A2Y": {
+        "min_rounds": 1,
+        "max_rounds": 1,
+        "total_bits": 64, 
+        "least_spreadout": [64],
+        "most_spreadout": [64]
+    }
+}

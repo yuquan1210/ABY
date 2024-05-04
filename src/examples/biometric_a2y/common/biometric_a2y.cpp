@@ -15,7 +15,7 @@
             along with this program. If not, see <http://www.gnu.org/licenses/>.
  \brief		Implementation of Minimum Euclidean Distance Circuit
  */
-#include "biometric.h"
+#include "biometric_a2y.h"
 #include "../../../abycore/circuit/booleancircuits.h"
 #include "../../../abycore/sharing/sharing.h"
 #include <iostream>
@@ -35,8 +35,8 @@ int32_t test_min_eucliden_dist_circuit(e_role role, const std::string& address, 
 	Circuit* bc = sharings[S_BOOL]->GetCircuitBuildRoutine();
 
     Circuit *distcirc, *mincirc;
-    distcirc = sharings[sharing]->GetCircuitBuildRoutine();
-	mincirc = sharings[sharing]->GetCircuitBuildRoutine();
+    distcirc = ac;
+	mincirc = yc;
 
 	// crypto* crypt = new crypto(seclvl.symbits, (uint8_t*) const_seed);
 	uint32_t **serverdb, *clientquery;
@@ -44,10 +44,10 @@ int32_t test_min_eucliden_dist_circuit(e_role role, const std::string& address, 
 
 	share ***Sshr, **Cshr, **Ssqr, *Csqr;
 
-	std::ofstream outFile("/home/ethan/MPC/ABY/bio_circ.txt"); // Create an ofstream object for output and open "example.txt"
+	std::ofstream outFile("/home/ethan/MPC/ABY/bio_a2y_circ.txt"); // Create an ofstream object for output and open "example.txt"
 
     if (!outFile) { // Check if the file was successfully opened
-        std::cerr << "Error opening /home/ethan/MPC/ABY/bio_circ.txt" << std::endl;
+        std::cerr << "Error opening /home/ethan/MPC/ABY/bio_a2y_circ.txt" << std::endl;
         return 1; // Return an error code
     }
 
@@ -126,6 +126,14 @@ int32_t test_min_eucliden_dist_circuit(e_role role, const std::string& address, 
 		outFile << "gate_id: " << distance[i] << ", gate_type: SUB, in_left: " << temp << ", in_right: " << old_addr << std::endl; 
     }
 
+	// do a2y conversion
+	for (uint32_t i = 0; i < dbsize; i++)
+    {
+		old_addr = distance[i];
+		distance[i] = mincirc->PutA2YGate(distance[i]);
+		outFile << "gate_id: " << distance[i] << ", gate_type: GT, in_left: " << old_addr << ", in_right: None" << std::endl; 
+	}
+
     //find min in distance[]
     share* cmp;
     mindist = distance[0];
@@ -144,7 +152,7 @@ int32_t test_min_eucliden_dist_circuit(e_role role, const std::string& address, 
 
 	outFile.close();
 	SaveMaxDepth(party->GetTotalDepth());
-	GenerateCircSpreadSheet("ss.csv");
+	GenerateCircSpreadSheet("biometric_a2y.csv");
     CalculateAllCircuitCost(ac, bc, yc);
 	party->ExecCircuit();
 

@@ -62,6 +62,7 @@ uint32_t ArithmeticCircuit::PutMULGate(uint32_t inleft, uint32_t inright) {
 
 	uint32_t gateid = m_cCircuit->PutPrimitiveGate(G_NON_LIN, inleft, inright, m_nRoundsAND);
 	UpdateInteractiveQueue(gateid);
+	SaveGate(inleft, inright, gateid, m_vGates[gateid].depth, m_vGates[gateid].sharebitlen);
 
 	if (m_vGates[gateid].nvals != INT_MAX) {
 		//TODO implement for NON_LIN_VEC
@@ -96,6 +97,8 @@ uint32_t ArithmeticCircuit::PutADDGate(uint32_t inleft, uint32_t inright) {
 }
 
 share* ArithmeticCircuit::PutADDGate(share* ina, share* inb) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("ADD_A", hl_gate_id+1);
 	share* shr = new arithshare(this);
 	shr->set_wire_id(0, PutADDGate(ina->get_wire_id(0), inb->get_wire_id(0)));
 	return shr;
@@ -111,6 +114,8 @@ uint32_t ArithmeticCircuit::PutSUBGate(uint32_t inleft, uint32_t inright) {
 }
 
 share* ArithmeticCircuit::PutSUBGate(share* ina, share* inb) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("SUB_A", hl_gate_id+1);
 	share* shr = new arithshare(this);
 	shr->set_wire_id(0, PutSUBGate(ina->get_wire_id(0), inb->get_wire_id(0)));
 	return shr;

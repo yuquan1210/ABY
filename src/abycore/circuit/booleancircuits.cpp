@@ -152,6 +152,7 @@ uint32_t BooleanCircuit::PutVectorANDGate(uint32_t choiceinput, uint32_t vectori
 
 	uint32_t gateid = m_cCircuit->PutNonLinearVectorGate(G_NON_LIN_VEC, choiceinput, vectorinput, m_nRoundsAND);
 	UpdateInteractiveQueue(gateid);
+	SaveGate(choiceinput, vectorinput, gateid, m_vGates[gateid].depth, m_vGates[gateid].sharebitlen);
 
 	//std::cout << "Putting a vector and gate between a gate with " << m_vGates[choiceinput].nvals << " and " <<
 	//		m_vGates[vectorinput].nvals << ", res gate has nvals = " << m_vGates[gateid].nvals << std::endl;
@@ -916,13 +917,13 @@ share* BooleanCircuit::PutADDGate(share* ina, share* inb) {
     std::cout << "a bitlength: " << ina->get_bitlength() << "; maxbitlength: " << ina->get_max_bitlength() << std::endl;
     std::cout << "b bitlength: " << inb->get_bitlength() << "; maxbitlength: " << inb->get_max_bitlength() << std::endl;
 	bool carry = std::max(ina->get_bitlength(), inb->get_bitlength()) < std::max(ina->get_max_bitlength(), inb->get_max_bitlength());
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("ADD_B", hl_gate_id+1);
 	return new boolshare(PutAddGate(ina->get_wires(), inb->get_wires(), carry), this);
 }
 
 
 std::vector<uint32_t> BooleanCircuit::PutAddGate(std::vector<uint32_t> left, std::vector<uint32_t> right, BOOL bCarry) {
-	// uint32_t hl_gate_id = GetCurrHighLevelGateId();
-	// UpdateCurrHighLevelGate("ADD_B", hl_gate_id+1);
 	PadWithLeadingZeros(left, right);
 	if (m_eContext == S_BOOL) {
 		return PutDepthOptimizedAddGate(left, right, bCarry);
@@ -1412,6 +1413,8 @@ share* BooleanCircuit::PutMULGate(share* ina, share* inb) {
 
 share* BooleanCircuit::PutGTGate(share* ina, share* inb) {
 	share* shr = new boolshare(1, this);
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("GT_B", hl_gate_id+1);
 	shr->set_wire_id(0, PutGTGate(ina->get_wires(), inb->get_wires()));
 	return shr;
 }
@@ -1421,6 +1424,8 @@ share* BooleanCircuit::PutEQGate(share* ina, share* inb) {
 	return shr;
 }
 share* BooleanCircuit::PutMUXGate(share* ina, share* inb, share* sel) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("MUX_B", hl_gate_id+1);
 	return new boolshare(PutMUXGate(ina->get_wires(), inb->get_wires(), sel->get_wire_id(0)), this);
 }
 
@@ -1572,6 +1577,8 @@ std::vector<uint32_t> BooleanCircuit::PutSUBGate(std::vector<uint32_t> a, std::v
 }
 
 share* BooleanCircuit::PutSUBGate(share* ina, share* inb) {
+	uint32_t hl_gate_id = GetCurrHighLevelGateId();
+	UpdateCurrHighLevelGate("SUB_B", hl_gate_id+1);
 	return new boolshare(PutSUBGate(ina->get_wires(), inb->get_wires(), std::max(ina->get_max_bitlength(), inb->get_max_bitlength())), this);
 }
 

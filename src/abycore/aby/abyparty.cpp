@@ -418,13 +418,13 @@ BOOL ABYParty::EvaluateCircuit() {
 #endif
 		}
 #if BENCHONLINEPHASE
-		std::cout << "\nOnline time at layer " << depth << ": " << std::endl;
-		std::cout << "Bool: local gates: " << currLocalops[S_BOOL] << ", interactive gates: " << currInteractiveops[S_BOOL] << ", layer finish: " << currFincirclayer[S_BOOL] << std::endl;
-		std::cout << "Yao: local gates: " << currLocalops[S_YAO] << ", interactive gates: " << currInteractiveops[S_YAO] << ", layer finish: " << currFincirclayer[S_YAO] << std::endl;
-		std::cout << "Yao Rev: local gates: " << currLocalops[S_YAO_REV] << ", interactive gates: " << currInteractiveops[S_YAO_REV] << ", layer finish: " << currFincirclayer[S_YAO_REV] << std::endl;
-		std::cout << "Arith: local gates: " << currLocalops[S_ARITH] << ", interactive gates: " << currInteractiveops[S_ARITH] << ", layer finish: " << currFincirclayer[S_ARITH] << std::endl;
-		std::cout << "SPLUT: local gates: " << currLocalops[S_SPLUT] << ", interactive gates: " << currInteractiveops[S_SPLUT] << ", layer finish: " << currFincirclayer[S_SPLUT] << std::endl;
-		std::cout << "Communication: " << currInteraction << std::endl << std::endl;
+		// std::cout << "\nOnline time at layer " << depth << ": " << std::endl;
+		// std::cout << "Bool: local gates: " << currLocalops[S_BOOL] << ", interactive gates: " << currInteractiveops[S_BOOL] << ", layer finish: " << currFincirclayer[S_BOOL] << std::endl;
+		// std::cout << "Yao: local gates: " << currLocalops[S_YAO] << ", interactive gates: " << currInteractiveops[S_YAO] << ", layer finish: " << currFincirclayer[S_YAO] << std::endl;
+		// std::cout << "Yao Rev: local gates: " << currLocalops[S_YAO_REV] << ", interactive gates: " << currInteractiveops[S_YAO_REV] << ", layer finish: " << currFincirclayer[S_YAO_REV] << std::endl;
+		// std::cout << "Arith: local gates: " << currLocalops[S_ARITH] << ", interactive gates: " << currInteractiveops[S_ARITH] << ", layer finish: " << currFincirclayer[S_ARITH] << std::endl;
+		// std::cout << "SPLUT: local gates: " << currLocalops[S_SPLUT] << ", interactive gates: " << currInteractiveops[S_SPLUT] << ", layer finish: " << currFincirclayer[S_SPLUT] << std::endl;
+		// std::cout << "Communication: " << currInteraction << std::endl << std::endl;
 #endif
 	}
 #ifdef DEBUGABYPARTY
@@ -434,13 +434,13 @@ BOOL ABYParty::EvaluateCircuit() {
 	delete m_tPartyChan;
 
 #if BENCHONLINEPHASE
-	std::cout << "Online time is distributed as follows: " << std::endl;
-	std::cout << "Bool: local gates: " << localops[S_BOOL] << ", interactive gates: " << interactiveops[S_BOOL] << ", layer finish: " << fincirclayer[S_BOOL] << std::endl;
-	std::cout << "Yao: local gates: " << localops[S_YAO] << ", interactive gates: " << interactiveops[S_YAO] << ", layer finish: " << fincirclayer[S_YAO] << std::endl;
-	std::cout << "Yao Rev: local gates: " << localops[S_YAO_REV] << ", interactive gates: " << interactiveops[S_YAO_REV] << ", layer finish: " << fincirclayer[S_YAO_REV] << std::endl;
-	std::cout << "Arith: local gates: " << localops[S_ARITH] << ", interactive gates: " << interactiveops[S_ARITH] << ", layer finish: " << fincirclayer[S_ARITH] << std::endl;
-	std::cout << "SPLUT: local gates: " << localops[S_SPLUT] << ", interactive gates: " << interactiveops[S_SPLUT] << ", layer finish: " << fincirclayer[S_SPLUT] << std::endl;
-	std::cout << "Communication: " << interaction << std::endl << std::endl;
+	// std::cout << "Online time is distributed as follows: " << std::endl;
+	// std::cout << "Bool: local gates: " << localops[S_BOOL] << ", interactive gates: " << interactiveops[S_BOOL] << ", layer finish: " << fincirclayer[S_BOOL] << std::endl;
+	// std::cout << "Yao: local gates: " << localops[S_YAO] << ", interactive gates: " << interactiveops[S_YAO] << ", layer finish: " << fincirclayer[S_YAO] << std::endl;
+	// std::cout << "Yao Rev: local gates: " << localops[S_YAO_REV] << ", interactive gates: " << interactiveops[S_YAO_REV] << ", layer finish: " << fincirclayer[S_YAO_REV] << std::endl;
+	// std::cout << "Arith: local gates: " << localops[S_ARITH] << ", interactive gates: " << interactiveops[S_ARITH] << ", layer finish: " << fincirclayer[S_ARITH] << std::endl;
+	// std::cout << "SPLUT: local gates: " << localops[S_SPLUT] << ", interactive gates: " << interactiveops[S_SPLUT] << ", layer finish: " << fincirclayer[S_SPLUT] << std::endl;
+	// std::cout << "Communication: " << interaction << std::endl << std::endl;
 #endif
 
 	double RTT = 0;
