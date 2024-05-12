@@ -118,8 +118,8 @@ share* BuildMillionaireProbCircuit(share *s_alice, share *s_bob, Circuit *ac, Ci
 
 	/** Calling the greater than equal function in the Boolean circuit class.*/
     mul_out_a = ac->PutMULGate(s_alice, s_bob);
-	mul_out_y = bc->PutA2YGate(mul_out_a);
-	and_out_y = bc->PutANDGate(mul_out_y, mul_out_y);
+	mul_out_y = yc->PutA2YGate(mul_out_a);
+	and_out_y = yc->PutANDGate(mul_out_y, mul_out_y);
 
 	return bc->PutOUTGate(and_out_y, ALL);
 }

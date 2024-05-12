@@ -447,8 +447,8 @@ BOOL ABYParty::EvaluateCircuit() {
 	double bw = 0;
 	estimate_network(GetSendTimingsFromTimer(), GetSendDataSizeFromTimer(), GetRcvTimingsFromTimer(), GetRcvDataSizeFromTimer(), maxdepth, RTT, bw);
 	std::cout << "\n***Estimating over " << maxdepth << " communications" << std::endl;
-	std::cout << "RTT: " << RTT << std::endl;
-	std::cout << "bw: " << bw << std::endl << std::endl;
+	std::cout << "RTT: " << RTT << " ms" << std::endl;
+	std::cout << "bw: " << bw << " bits/ms" << std::endl << std::endl;
 	return true;
 }
 

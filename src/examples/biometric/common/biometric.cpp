@@ -161,6 +161,68 @@ int32_t test_min_eucliden_dist_circuit(e_role role, const std::string& address, 
 	free(clientquery);
 	free(Cshr);
 
+	std::vector<std::vector<double>> tt_localop_timings(5);
+    std::vector<std::vector<double>> tt_interop_timings(5);
+    std::vector<std::vector<double>> tt_finishlay_timings(5);
+    std::map<uint32_t, double> tt_send_timings;
+    std::map<uint32_t, uint64_t> send_datasize;
+    std::map<uint32_t, double> tt_rcv_timings;
+    std::map<uint32_t, uint64_t> rcv_datasize;
+
+    double tt_online_time = 0.0;
+    double online_time;
+	std::vector<std::vector<double>> localop_timings = party->GetLocalOpTimings();
+	std::vector<std::vector<double>> interop_timings = party->GetInterOpTimings();
+	std::vector<std::vector<double>> finishlay_timings = party->GetFinishLayerTimings();
+	std::map<uint32_t, double> send_timings = party->GetSendTimings();
+	std::map<uint32_t, double> rcv_timings = party->GetRcvTimings();
+	int i = 0;
+	if(i == 0){
+		for(int sharing = 0; sharing < 5; sharing++){
+			tt_localop_timings[sharing] = localop_timings[sharing];
+			tt_interop_timings[sharing] = interop_timings[sharing];
+			tt_finishlay_timings[sharing] = finishlay_timings[sharing];
+		}
+		tt_send_timings = send_timings;
+		tt_rcv_timings = rcv_timings;
+		send_datasize = party->GetSendDataSize();
+		rcv_datasize = party->GetRcvDataSize();
+	} else {
+		for(int sharing = 0; sharing < 5; sharing++){
+			for(int layer = 0; layer < localop_timings[0].size(); layer++){
+				tt_localop_timings[sharing][layer] += localop_timings[sharing][layer];
+				tt_interop_timings[sharing][layer] += interop_timings[sharing][layer];
+				tt_finishlay_timings[sharing][layer] += finishlay_timings[sharing][layer];
+			}
+		}
+		for(int layer = 0; layer < localop_timings[0].size(); layer++){
+			tt_send_timings[layer] += send_timings[layer];
+			tt_rcv_timings[layer] += rcv_timings[layer];
+		}
+	}
+	online_time = party->GetTiming(P_ONLINE);
+	tt_online_time += online_time;
+
+	std::cout << "Send communication per layer per test: " << std::endl;
+	int num_tests = 1;
+    double avg_sendtime_sum = 0;
+    double avg_rcvtime_sum = 0;
+    for(int layer = 0; layer < tt_localop_timings[0].size(); layer++){
+        // std::cout << "\tlayer " << layer << ": interaction: " << tt_interaction_timings[layer] / num_tests << std::endl;
+        std::cout << layer << "," << (send_datasize[layer]+rcv_datasize[layer])*8 << "," << (tt_send_timings[layer] + tt_rcv_timings[layer]) / ((double)num_tests) << "" << std::endl;
+        // << "Send: " << send_datasize[layer] << " bytes " << tt_send_timings[layer] / ((double)num_tests) << " ms, "
+        // << "Rcv: " << rcv_datasize[layer] << " bytes " << tt_rcv_timings[layer] / ((double)num_tests) << " ms" << std::endl;
+        avg_sendtime_sum += tt_send_timings[layer] / ((double)num_tests);
+        avg_rcvtime_sum += tt_rcv_timings[layer] / ((double)num_tests);
+    }
+    std::cout << "avg send time sum: " << avg_sendtime_sum << std::endl;
+    std::cout << "avg rcv time sum: " << avg_rcvtime_sum << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "\ntt_online_time: " << tt_online_time << " ms" << std::endl;
+    std::cout << "avg online time over " << num_tests << " reps: " << tt_online_time / ((double)num_tests) << std::endl;
+
+
 	return 0;
 }
 

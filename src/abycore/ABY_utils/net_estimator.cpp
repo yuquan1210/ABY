@@ -14,7 +14,7 @@ void estimate_network(std::map<uint32_t, double> send_timings, std::map<uint32_t
     double datasize_layer;
     double timing_layer;
     for(int layer = 0; layer < num_layers; layer++){
-        datasize_layer = send_datasize[layer] +rcv_datasize[layer];
+        datasize_layer = send_datasize[layer]*8 +rcv_datasize[layer]*8; //byte to bits, times 8
         timing_layer = send_timings[layer] + rcv_timings[layer]; 
         sum_x += datasize_layer;
         sum_y += timing_layer;
